@@ -8,7 +8,9 @@ PREFIX_HANDLER = environ.get("PREFIX_HANDLER", default="/").split()
 group = environ("CHANNEL", default="1752851548 1747117888 1735333104")
 CHANNEL = [int(i) for i in group.split(" ")]
 sudo = environ("SUDO", default="")
-SUDO = [int(i) for i in sudo.split(" ")]
+SUDO = []
+if sudo:
+  SUDO = [int(i) for i in sudo.split(" ")]
 
 
 BOT_USERNAME = ""
