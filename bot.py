@@ -20,16 +20,6 @@ pre = PREFIX_HANDLER
 CT = ChatType
 
 
-async def runner():
-    psy.start()
-    print("Bot is ready to be used!")
-    me = await psy.get_me()
-    BOT_USERNAME = me.username
-    BOT_ID = me.id
-    BOT_NAME = me.first_name
-    print("Bot is dead now!")
-    psy.stop()
-
 
 @psy.on_message(filters.command(["start"], pre))
 async def start(_, m: Message):
@@ -207,4 +197,4 @@ async def forwarder(_, m: Message):
     else:
         pass
 
-psy.run(runner())
+psy.run()
