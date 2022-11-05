@@ -162,7 +162,7 @@ async def forwardto(_, m: Message):
         return await m.reply_text("I can't download that!")
     try:
         x = await psy.send_photo(c_id, photo, caption)
-        # await x.reply_document(photo, caption=caption)
+        await x.reply_document(photo, caption=caption)
         os.remove(photo)
         return await m.reply_text("Done!")
     except Exception as e:
@@ -184,13 +184,13 @@ async def forwarder(_, m: Message):
         try:
             if len(channel) == 1:
                 x = await psy.send_photo(channel[1], photo, caption)
-                # await x.reply_document(photo, caption=caption)
+                await x.reply_document(photo, caption=caption)
                 os.remove(photo)
                 return await m.reply_text("Done!")
             channel = list(set(channel))
             async for c_id in channel:
                 x = await psy.send_photo(c_id, photo, caption)
-                # await x.reply_document(photo, caption=caption)
+                await x.reply_document(photo, caption=caption)
             os.remove(photo)
             return await m.reply_text("Done!")
         except Exception as e:
