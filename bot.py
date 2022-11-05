@@ -187,6 +187,7 @@ async def forwarder(_, m: Message):
                 await x.reply_document(photo, caption=caption)
                 os.remove(photo)
                 return await m.reply_text("Done!")
+            channel = list(set(channel))
             async for c_id in channel:
                 x = await psy.send_photo(c_id, photo, caption)
                 await x.reply_document(photo, caption=caption)
