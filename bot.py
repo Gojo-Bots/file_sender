@@ -138,7 +138,7 @@ async def rmsudo(_, m: Message):
     return await m.reply_text(f"Removed `{u_id}` from sudoer list")
 
 
-@psy.on_message(filters.command(["forwardto", "fto"], pre), filters.text)
+@psy.on_message(filters.command(["forwardto", "fto"], pre) & filters.text)
 async def forwardto(_, m: Message):
     if m.from_user.id not in SUDOER:
         return await m.reply_text("You can't do that")
