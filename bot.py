@@ -48,7 +48,7 @@ async def start(_, m: Message):
 async def help(_, m: Message):
     if m.chat.type != CT.PRIVATE:
         await m.reply_text(
-            "I am alive",
+            "What do u want to know",
             InlineKeyboardMarkup(
                 [
                     [
@@ -183,7 +183,7 @@ async def forwarder(_, m: Message):
             return await m.reply_text("I can't download that!")
         try:
             if len(channel) == 1:
-                x = await psy.send_photo(channel[1], photo, caption)
+                x = await psy.send_photo(channel[0], photo, caption)
                 await x.reply_document(photo, caption=caption)
                 os.remove(photo)
                 return await m.reply_text("Done!")
