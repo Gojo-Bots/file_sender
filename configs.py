@@ -1,13 +1,13 @@
-from os import environ
+from os import getenv
 
-BOT_TOKEN = environ.get("BOT_TOKEN", None)
-API_ID = int(environ.get("API_ID", 18))
-API_HASH = environ.get("API_HASH", None)
-OWNER_ID = int(environ.get("OWNER_ID", None))
-PREFIX_HANDLER = environ.get("PREFIX_HANDLER", default="/").split()
-group = environ("CHANNEL", default="1752851548 1747117888 1735333104")
+BOT_TOKEN = getenv("BOT_TOKEN", None)
+API_ID = int(getenv("API_ID", 18))
+API_HASH = getenv("API_HASH", None)
+OWNER_ID = int(getenv("OWNER_ID", None))
+PREFIX_HANDLER = getenv("PREFIX_HANDLER", default="/").split()
+group = getenv("CHANNEL", default="1752851548 1747117888 1735333104")
 CHANNEL = [int(i) for i in group.split(" ")]
-sudo = environ("SUDO", default="")
+sudo = getenv("SUDO", default="")
 SUDO = []
 if sudo:
   SUDO = [int(i) for i in sudo.split(" ")]
