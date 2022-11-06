@@ -1,6 +1,6 @@
 from configs import *
 
-grp = [1752851548, 1747117888, 1735333104]
+grp = [1747117888]
 
 channel = list(
     set(CHANNEL + grp)
