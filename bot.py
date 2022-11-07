@@ -172,8 +172,12 @@ async def forwardto(_, m: Message):
     if not photo:
         return await m.reply_text("I can't download that!")
     try:
-        x = await psy.send_photo(c_id, photo, caption)
-        await x.reply_document(photo, caption=caption)
+        if caption:
+            x = await psy.send_photo(c_id, photo, caption)
+            await x.reply_document(photo, caption=caption)
+        else:
+            x = await psy.send_photo(c_id, photo)
+            await x.reply_document(photo) 
         os.remove(photo)
         return await m.reply_text("Done!")
     except Exception as e:
