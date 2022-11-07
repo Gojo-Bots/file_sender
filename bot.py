@@ -19,7 +19,10 @@ psy = Client(
 pre = PREFIX_HANDLER
 CT = ChatType
 
-
+me = await psy.get_me()
+BOT_USERNAME = me.username
+BOT_ID = me.id
+BOT_NAME = me.first_name
 
 @psy.on_message(filters.command(["start"], pre))
 async def start(_, m: Message):
