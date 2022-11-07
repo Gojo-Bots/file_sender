@@ -19,14 +19,11 @@ psy = Client(
 pre = PREFIX_HANDLER
 CT = ChatType
 
-async def bot_info():
-    me = await psy.get_me()
-    BOT_USERNAME = me.username
-    BOT_ID = me.id
-    BOT_NAME = me.first_name
 
 @psy.on_message(filters.command(["start"], pre))
 async def start(_, m: Message):
+    me = await psy.get_me()
+    BOT_USERNAME = me.username
     if m.chat.type != CT.PRIVATE:
         await m.reply_text(
             "I am alive",
@@ -51,6 +48,8 @@ async def start(_, m: Message):
     
 @psy.on_message(filters.command(["help"], pre))
 async def help(_, m: Message):
+    me = await psy.get_me()
+    BOT_USERNAME = me.username
     if m.chat.type != CT.PRIVATE:
         await m.reply_text(
             "What do u want to know",
@@ -182,6 +181,8 @@ async def forwardto(_, m: Message):
 
 @psy.on_message(filters.photo)
 async def forwarder(_, m: Message):
+    me = await psy.get_me()
+    BOT_ID = me.id
     if m.chat.id == BOT_ID:
         if not bool(m.photo):
             return await m.reply_text("Send image")
