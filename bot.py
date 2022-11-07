@@ -91,7 +91,7 @@ async def rmchannel(_, m: Message):
     channel.remove(c_id)
     return await m.reply_text(f"Removed `{c_id}` from the channel list")
 
-@psy.on_message(filters.command("addsudo"), pre)
+@psy.on_message(filters.command(["addsudo", "appendsudo"], pre))
 async def addsudo(_, m: Message):
     if m.from_user.id != OWNER_ID:
         return await m.reply_text("You can't do that")
