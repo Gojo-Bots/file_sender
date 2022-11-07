@@ -26,7 +26,7 @@ async def start(_, m: Message):
     if m.chat.type != CT.PRIVATE:
         await m.reply_text(
             "I am alive",
-            InlineKeyboardMarkup(
+            reply_markup=InlineKeyboardMarkup(
                 [
                     [
                         InlineKeyboardButton(
@@ -50,7 +50,7 @@ async def help(_, m: Message):
     if m.chat.type != CT.PRIVATE:
         await m.reply_text(
             "What do u want to know",
-            InlineKeyboardMarkup(
+            reply_markup=InlineKeyboardMarkup(
                 [
                     [
                         InlineKeyboardButton(
