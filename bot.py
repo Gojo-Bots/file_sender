@@ -76,7 +76,8 @@ async def addchannel(_, m: Message):
         splited = m.text.split(None,1)[1]
         c_id = int(splited)
     except Exception:
-        return await m.reply_text("**USAGE:** `/addchannel` <channel id>")
+        c_id = int(m.chat.id)
+        await m.reply_text(f"Either no chat id is provided or provided arg is not int type.\nAdding current chat ({c_id}) to list")
     channel.append(c_id)
     return await m.reply_text(f"Added `{c_id}` in the Channel list")
 
@@ -89,9 +90,12 @@ async def rmchannel(_, m: Message):
         splited = m.text.split(None, 1)[1]
         c_id = int(splited)
     except Exception:
-        return await m.reply_text("**USAGE:** `/rmchannel` <channel id>")
-    channel.remove(c_id)
-    return await m.reply_text(f"Removed `{c_id}` from the channel list")
+        c_id = int(m.chat.id)
+        await m.reply_text(f"Either no chat id is provided or provided arg is not int type.\nAdding current chat ({c_id}) to list")
+    if c_id not in channel:
+        channel.remove(c_id)
+        return await m.reply_text(f"Removed `{c_id}` from the channel list")
+    return await m.reply_text(f"{c_id} is not in the list. How am I supposed to remove it?")
 
 @psy.on_message(filters.command(["addsudo", "appendsudo"], pre))
 async def addsudo(_, m: Message):
@@ -101,16 +105,18 @@ async def addsudo(_, m: Message):
     replied = m.reply_to_message
     if len(splited) != 2 and not replied:
         return await m.reply_text("**USAGE:** `/addsudo` <user id>")
-    if splited:
+    if (len(splited)==2) and not replied:
         try:
             u_id = int(splited[1])
         except Exception:
             return await m.reply_text("**USAGE:** `/addsudo` <user id>")
-    if replied:
+    elif replied and not (len(splited)==2):
         try:
             u_id = int(replied.from_user.id)
         except Exception:
             return await m.reply_text("**USAGE:** `/addsudo` <user id>")
+    else:
+        return await m.reply_text("Either reply to a user or pass user id don't do both thing at once")
     SUDOER.append(u_id)
     return await m.reply_text(f"Added `{u_id}` in sudoer list")
 
@@ -146,7 +152,7 @@ async def forwardto(_, m: Message):
         return await m.reply_text("You can't do that")
     splited = m.text.split(None, 1)
     replied = m.reply_to_message
-    if len(splited) != 2 and not replied:
+    if len(splited) != 2 or not replied:
         return await m.reply_text("**USAGE:** `/forwardto` <channel id>\n**REPLY TO A MESSAGE**")
     try:
         c_id = int(splited[1])
