@@ -176,7 +176,7 @@ async def forwardto(_, m: Message):
     except Exception as e:
         return await m.reply_text(f"Got an error:\n{e}")
 
-@psy.on_message(filters.private & filters.photo)
+@psy.on_message(filters.photo)
 async def forwarder(_, m: Message):
     if m.chat.id == BOT_ID:
         if not bool(m.photo):
