@@ -40,6 +40,7 @@ async def start(_, m: Message):
 
     else:
         await psy.send_message(
+            m.chat.id
             "Forward me any media or message I will forward to the targeted chat.\nUse /help to see the list of commands"
         )
     return
