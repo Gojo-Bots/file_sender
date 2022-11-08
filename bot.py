@@ -199,7 +199,7 @@ async def forwardto(_, m: Message):
     except Exception as e:
         return await m.reply_text(f"Got an error:\n{e}")
 
-@psy.on_mesage(filters.command(["channels", "sudos", "default"], pre))
+@psy.on_message(filters.command(["channels", "sudos", "default"], pre))
 async def channel_sudo(_, m: Message):
     if len(m.text.split()) != 1:
         return await m.reply_text("Do /help to get help")
