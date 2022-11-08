@@ -2,7 +2,7 @@ import os
 
 from pyrogram import Client, filters
 from pyrogram.enums import ChatType
-from pyrogram.errors import RPCError
+# from pyrogram.errors import RPCError
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message
 
 from configs import *
@@ -80,8 +80,11 @@ async def addchannel(_, m: Message):
         c_id = int(splited)
     except Exception:
         c_id = int(m.chat.id)
-        await m.reply_text(f"Either no chat id is provided or provided arg is not int type.\nAdding current chat ({c_id}) to list")
+        if m.chat.type == CT.PRIVATE:
+            return await m.reply_text("**USAGE:**\n`/addchannel <channel id>`")
+        x = await m.reply_text(f"Either no chat id is provided or provided arg is not int type.\nAdding current chat ({c_id}) to list")
     channel.append(c_id)
+    x.delete()
     return await m.reply_text(f"Added `{c_id}` in the Channel list")
 
 
@@ -93,10 +96,18 @@ async def rmchannel(_, m: Message):
         splited = m.text.split(None, 1)[1]
         c_id = int(splited)
     except Exception:
+        if splited.lower() == "all":
+            x = await m.reply_text("Clearing all channel id from list")
+            channel.clear()
+            x.delete()
+            return await m.reply_text("Done")
         c_id = int(m.chat.id)
-        await m.reply_text(f"Either no chat id is provided or provided arg is not int type.\nAdding current chat ({c_id}) to list")
-    if c_id not in channel:
+        if m.chat.type == CT.PRIVATE:
+            return await m.reply_text("**USAGE:**\n`/rmchannel <channel id> / all`")
+        x = await m.reply_text(f"Either no chat id is provided or provided arg is not int type.\nRemoveing current chat ({c_id}) from list")
+    if c_id in channel:
         channel.remove(c_id)
+        x.delete()
         return await m.reply_text(f"Removed `{c_id}` from the channel list")
     return await m.reply_text(f"{c_id} is not in the list. How am I supposed to remove it?")
 
@@ -137,6 +148,11 @@ async def rmsudo(_, m: Message):
                 return await m.reply_text("User is not a sudoer")
             u_id = int(splited[1])
         except Exception:
+            if splited.lower() == "all":
+                x = await m.reply_text("Clearing all channel id from list")
+                channel.clear()
+                x.delete()
+                return await m.reply_text("Done")
             return await m.reply_text("**USAGE:** `/rmsudo` <user id>")
     if replied:
         try:
@@ -183,13 +199,65 @@ async def forwardto(_, m: Message):
     except Exception as e:
         return await m.reply_text(f"Got an error:\n{e}")
 
-@psy.on_message(filters.photo)
+@psy.on_mesage(filters.command(["channels", "sudos", "default"], pre))
+async def channel_sudo(_, m: Message):
+    if len(m.text.split()) != 1:
+        return await m.reply_text("Do /help to get help")
+    try:
+        if m.text.lower() == "/channels":
+            channel = list(set(channel))
+            req = ""
+            for ch in channel:
+                req += ch+"\n"
+            return await m.reply_text(f"Here is the list of channel:\n`{req}`")
+        elif m.text.lower() == "/default":
+            return await m.reply_text(f"The Default chat is `{default[0]}`")
+        SUDOER = list(set(SUDOER))
+        req = ""
+        for u_id in SUDOER:
+            req += u_id+"\n"
+        return m.reply_text(f"Here is the list of channel:\n`{req}`")
+    except Exception as e:
+        return await m.reply_text(f"Got an error:\n{e}")
+
+@psy.on_message(filters.command(["apdefault"], pre))
+async def add_default(_, m: Message):
+    if m.from_user.id not in SUDOER:
+        return await m.reply_text("You can't do that")
+    try:    
+        splited = m.text.split(None,1)[1]
+        c_id = int(splited)
+    except Exception:
+        c_id = int(m.chat.id)
+        if m.chat.type == CT.PRIVATE:
+            return await m.reply_text("**USAGE:**\n`/apdefault <channel id>`")
+        x = await m.reply_text(f"Either no chat id is provided or provided arg is not int type.\nAdding current chat ({c_id}) as default")
+    default.clear()
+    default.append(c_id)
+    x.delete()
+    return await m.reply_text(f"Added `{c_id}` as default channel")
+
+@psy.on_message(filters.command(["rmdefault"], pre))
+async def rm_default(_, m: Message):
+    if m.from_user.id not in SUDOER:
+        return await m.reply_text("You can't do that")
+    try:
+        if m.chat.type == CT.PRIVATE:
+            return await m.reply_text("**USAGE:**\n`/rmdefault <channel id>`")
+        x = await m.reply_text(f"Clearing default channel.")
+        default.clear()
+        x.delete()
+        return await m.reply_text("Cleared default channel")
+    except Exception as e:
+        return await m.reply_text(f"Got an error:\n{e}")
+
+@psy.on_message(filters.private & (filters.photo | filters.document | filters.video))
 async def forwarder(_, m: Message):
-    me = await psy.get_me()
-    BOT_ID = me.id
-    if m.chat.id == BOT_ID:
-        if not bool(m.photo):
-            return await m.reply_text("Send image")
+    # me = await psy.get_me()
+    # BOT_ID = me.id
+    if m.from_user.id in SUDOER:
+        if not bool(m.photo or m.document or m.video):
+            return await m.reply_text("Send photo or document or video")
         try:
             photo = await m.download()
             if m.caption:
@@ -198,18 +266,29 @@ async def forwarder(_, m: Message):
             return await m.reply_text(f"Got an error:\n{e}")
         if not photo:
             return await m.reply_text("I can't download that!")
-        try:
-            if len(channel) == 1:
-                x = await psy.send_photo(channel[0], photo, caption)
+        if caption:
+            splited = caption.split()[-1]
+            try:
+                c_id = int(splited)
+                x = await psy.send_photo(c_id, photo, caption)
                 await x.reply_document(photo, caption=caption)
                 os.remove(photo)
                 return await m.reply_text("Done!")
-            channel = list(set(channel))
-            async for c_id in channel:
-                x = await psy.send_photo(c_id, photo, caption)
-                await x.reply_document(photo, caption=caption)
-            os.remove(photo)
-            return await m.reply_text("Done!")
+            except Exception:
+                pass
+        try:
+            if not caption:
+                if len(channel) == 1:
+                    x = await psy.send_photo(channel[0], photo, caption)
+                    await x.reply_document(photo, caption=caption)
+                    os.remove(photo)
+                    return await m.reply_text("Done!")
+                channel = list(set(channel))
+                async for c_id in channel:
+                    x = await psy.send_photo(c_id, photo, caption)
+                    await x.reply_document(photo, caption=caption)
+                os.remove(photo)
+                return await m.reply_text("Done!")
         except Exception as e:
             return await m.reply_text(f"Got an error:\n{e}")
     else:

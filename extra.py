@@ -1,6 +1,6 @@
 from configs import *
 
-grp = [1747117888]
+grp = [-1001747117888]
 
 channel = list(
     set(CHANNEL + grp)
@@ -13,3 +13,6 @@ SUDOER = list(
         [int(OWNER_ID)] + sudoer + SUDO
     )
 )
+
+
+default = []
