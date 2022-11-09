@@ -208,7 +208,7 @@ async def channel_sudo(_, m: Message):
             channel = list(set(channel))
             req = ""
             for ch in channel:
-                req += ch+"\n"
+                req += str(ch)+"\n"
             return await m.reply_text(f"Here is the list of channel:\n`{req}`")
         elif m.text.lower() == "/default":
             return await m.reply_text(f"The Default chat is `{default[0]}`")
@@ -267,9 +267,10 @@ async def forwarder(_, m: Message):
         if not photo:
             return await m.reply_text("I can't download that!")
         if caption:
-            splited = caption.split()[-1]
+            splited = caption.split()
             try:
                 c_id = int(splited)
+                caption = caption.strip(str(c_id))
                 x = await psy.send_photo(c_id, photo, caption)
                 await x.reply_document(photo, caption=caption)
                 os.remove(photo)
