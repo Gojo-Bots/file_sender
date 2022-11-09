@@ -177,7 +177,8 @@ async def forwardto(_, m: Message):
         c_id = int(splited[1])
     except Exception:
         return await m.reply_text("**USAGE:** `/forwardto` <channel id>")
-    if not bool(m.photo or m.document or m.video):
+    z = m.reply_to_message
+    if not bool(z.photo or z.document or z.video):
         return await m.reply_text("Reply to an image or document or video")
     try:
         file = await replied.download()
@@ -278,7 +279,7 @@ async def forwarder(_, m: Message):
             return await m.reply_text(f"Got an error:\n{e}")
         if not file:
             return await m.reply_text("I can't download that!")
-        if caption:
+        if m.caption:
             splited = caption.split()[-1]
             try:
                 c_id = int(splited)
