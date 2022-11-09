@@ -189,7 +189,7 @@ async def forwardto(_, m: Message):
     if not file:
         return await m.reply_text("I can't download that!")
     try:
-        if caption:
+        if replied.caption:
             if m.photo or m.document.file_name.endswith(exe):
                 x = await psy.send_photo(c_id, file, caption)
                 await x.reply_document(file, caption=caption)
