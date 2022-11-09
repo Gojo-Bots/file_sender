@@ -17,3 +17,5 @@ The bot will send the file (which have caption containing  chat id) to the given
 
 **NOTE: LAST MEANS AT THE END OF THE CAPTION**
 """
+
+exe = (".png", ".jpeg", ".jpg")

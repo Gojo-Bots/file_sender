@@ -15,4 +15,4 @@ SUDOER = list(
 )
 
 
-default = []
+default = [-1001747117888]
