@@ -267,7 +267,7 @@ async def forwarder(_, m: Message):
         if not photo:
             return await m.reply_text("I can't download that!")
         if caption:
-            splited = caption.split()
+            splited = caption.split()[-1]
             try:
                 c_id = int(splited)
                 caption = caption.strip(str(c_id))
