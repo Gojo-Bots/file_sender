@@ -215,17 +215,11 @@ async def channel_sudo(_, m: Message):
         return await m.reply_text("Do /help to get help")
     try:
         if m.text.lower() == "/channels":
-            channel = list(set(channel))
-            req = ""
-            for ch in channel:
-                req += str(ch)+"\n"
+            req = ", ".join(channel)
             return await m.reply_text(f"Here is the list of channel:\n`{req}`")
         elif m.text.lower() == "/default":
             return await m.reply_text(f"The Default chat is `{default[0]}`")
-        SUDOER = list(set(SUDOER))
-        req = ""
-        for u_id in SUDOER:
-            req += str(u_id)+"\n"
+        req = ", ".join(SUDOER)
         return m.reply_text(f"Here is the list of channel:\n`{req}`")
     except Exception as e:
         return await m.reply_text(f"Got an error:\n{e}")
@@ -350,6 +344,7 @@ async def forwarder(_, m: Message):
                             await psy.send_video(c_id, file)
                         os.remove(file)
                         return await m.reply_text("Done!")
+            c_id = default[0]
             if m.photo or m.document.file_name.endswith(exe):
                 if caption:
                     x = await psy.send_photo(c_id, file, caption)
