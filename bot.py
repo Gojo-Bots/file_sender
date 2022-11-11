@@ -19,6 +19,23 @@ psy = Client(
 pre = PREFIX_HANDLER
 CT = ChatType
 
+grp = [-1001747117888]
+
+channel = list(
+    set(CHANNEL + grp)
+)
+
+sudoer = []
+
+SUDOER = list(
+    set(
+        [int(OWNER_ID)] + sudoer + SUDO
+    )
+)
+
+
+default = [-1001747117888]
+
 
 @psy.on_message(filters.command(["start"], pre))
 async def start(_, m: Message):
