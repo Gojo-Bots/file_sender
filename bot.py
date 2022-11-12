@@ -239,9 +239,10 @@ async def channel_sudo(_, m: Message):
             return await m.reply_text(f"Here is the list of channel:\n`{req}`")
         elif m.text.lower() == "/default":
             return await m.reply_text(f"The Default chat is `{default[0]}`")
-        sudoers = [str(sudo) for sudo in SUDOER]
-        req = ", ".join(sudoers)
-        return m.reply_text(f"Here is the list of channel:\n`{req}`")
+        else:
+            sudoers = [str(sudo) for sudo in SUDOER]
+            req = ", ".join(sudoers)
+            return m.reply_text(f"Here is the list of channel:\n`{req}`")
     except Exception as e:
         return await m.reply_text(f"Got an error:\n{e}")
 
