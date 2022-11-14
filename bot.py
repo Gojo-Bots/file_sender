@@ -208,7 +208,7 @@ async def forwardto(_, m: Message):
     try:
         z = replied
         if replied.caption:
-            if m.photo or z.document.file_name.endswith(exe):
+            if m.photo or file.endswith(exe):
                 x = await psy.send_photo(c_id, file, caption)
                 await x.reply_document(file)
             if z.document:
@@ -216,7 +216,7 @@ async def forwardto(_, m: Message):
             if z.video:
                 await psy.send_video(c_id, file, caption)
         else:
-            if z.photo or z.document.file_name.endswith(exe):
+            if z.photo or file.endswith(exe):
                 x = await psy.send_photo(c_id, file)
                 await x.reply_document(file)
             if z.document:
@@ -299,7 +299,7 @@ async def forwarder(_, m: Message):
             try:
                 c_id = int(splited)
                 caption = caption.strip(str(c_id))
-                if m.photo or m.document.file_name.endswith(exe):
+                if m.photo or file.endswith(exe):
                     x = await psy.send_photo(c_id, file, caption)
                     await x.reply_document(file)
                     os.remove(file)
@@ -318,7 +318,7 @@ async def forwarder(_, m: Message):
             if not default:
                 if len(channel) == 1:
                     c_id = channel[0]
-                    if m.photo or m.document.file_name.endswith(exe):
+                    if m.photo or file.endswith(exe):
                         if m.caption:
                             x = await psy.send_photo(c_id, file, caption)
                             await x.reply_document(file)
@@ -343,7 +343,7 @@ async def forwarder(_, m: Message):
                         return await m.reply_text("Done!")
                 channel = list(set(channel))
                 async for c_id in channel:
-                    if m.photo or m.document.file_name.endswith(exe):
+                    if m.photo or file.endswith(exe):
                         if m.caption:
                             x = await psy.send_photo(c_id, file, caption)
                             await x.reply_document(file)
@@ -367,7 +367,7 @@ async def forwarder(_, m: Message):
                         os.remove(file)
                         return await m.reply_text("Done!")
             c_id = default[0]
-            if m.photo or m.document.file_name.endswith(exe):
+            if m.photo or file.endswith(exe):
                 if m.caption:
                     x = await psy.send_photo(c_id, file, caption)
                     await x.reply_document(file)
