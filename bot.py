@@ -211,10 +211,9 @@ async def forwardto(_, m: Message):
     z = replied
     fsplit = file.split("/")
     name = fsplit[-1]
-    exten = name.split(".")[-1]
     path = "/".join(fsplit[0:-2])
-    os.rename(file, f"{path}/@PsywallsBot.{exten}")
-    file = f"{path}/@PsywallsBot.{exten}"
+    os.rename(file, f"{path}/@PsywallsBot_{name}")
+    file = f"{path}/@PsywallsBot_{name}"
     try:
         if replied.caption:
             if m.photo or file.endswith(exe):
@@ -305,10 +304,9 @@ async def forwarder(_, m: Message):
             return await m.reply_text("I can't download that!")
         fsplit = file.split("/")
         name = fsplit[-1]
-        exten = name.split(".")[-1]
         path = "/".join(fsplit[0:-2])
-        os.rename(file, f"{path}/@PsywallsBot.{exten}")
-        file = f"{path}/@PsywallsBot.{exten}"
+        os.rename(file, f"{path}/@PsywallsBot_{name}")
+        file = f"{path}/@PsywallsBot_{name}"
         if m.caption:
             splited = caption.split()[-1]
             try:
