@@ -3,10 +3,11 @@ import os
 from pyrogram import Client, filters
 from pyrogram.enums import ChatType
 # from pyrogram.errors import RPCError
-from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message
+from pyrogram.types import (CallbackQuery, InlineKeyboardButton,
+                            InlineKeyboardMarkup, Message)
 
 from configs import *
-from extra import *
+# from extra import *
 from help import *
 
 psy = Client(
@@ -59,7 +60,8 @@ async def start(_, m: Message):
     else:
         await psy.send_message(
             m.chat.id,
-            "Forward me any media or message I will forward to the targeted chat.\nUse /help to see the list of commands"
+            "Forward me any media or message I will forward to the targeted chat.\nUse /help to see the list of commands",
+            reply_markup=start_kb,
         )
     return
     
@@ -84,7 +86,8 @@ async def help(_, m: Message):
     else:
         await psy.send_message(
             m.chat.id,
-            helpmsg
+            helpmsg,
+            reply_markup=help_kb,
         )
     return
 
@@ -205,8 +208,14 @@ async def forwardto(_, m: Message):
         return await m.reply_text(f"Got an error:\n{e}")
     if not file:
         return await m.reply_text("I can't download that!")
+    z = replied
+    fsplit = file.split("/")
+    name = fsplit[-1]
+    exten = name.split(".")[-1]
+    path = "/".join(fsplit[0:-2])
+    os.rename(file, f"{path}/@PsywallsBot.{exten}")
+    file = f"{path}/@PsywallsBot.{exten}"
     try:
-        z = replied
         if replied.caption:
             if m.photo or file.endswith(exe):
                 x = await psy.send_photo(c_id, file, caption)
@@ -294,6 +303,12 @@ async def forwarder(_, m: Message):
             return await m.reply_text(f"Got an error:\n{e}")
         if not file:
             return await m.reply_text("I can't download that!")
+        fsplit = file.split("/")
+        name = fsplit[-1]
+        exten = name.split(".")[-1]
+        path = "/".join(fsplit[0:-2])
+        os.rename(file, f"{path}/@PsywallsBot.{exten}")
+        file = f"{path}/@PsywallsBot.{exten}"
         if m.caption:
             splited = caption.split()[-1]
             try:
@@ -393,4 +408,32 @@ async def forwarder(_, m: Message):
     else:
         pass
 
+@psy.on_callback_query()
+async def callbacks(_,q: CallbackQuery):
+    try:
+        data = q.data
+        if data == "close":
+            await q.message.delete()
+            q.answer("Closed the menu")
+            return
+        elif data == "help":
+            await q.edit_message_text(
+                helpmsg,
+                reply_markup=help_kb
+            )
+            q.answer("Here is the help menu")
+            return
+        elif data == "back":
+            await q.edit_message_text(
+                "Forward me any media or message I will forward to the targeted chat.\nUse /help to see the list of commands",
+                reply_markup=start_kb
+            )
+            return await q.answer("Back")
+    except Exception as e:
+        c_id = q.message.chat.id
+        await q.message.delete()
+        return await psy.send_message(
+            c_id,
+            f"Got an error while handeling the callback quer:\n{e}")
+    
 psy.run()
