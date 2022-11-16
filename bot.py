@@ -243,12 +243,18 @@ async def channel_sudo(_, m: Message):
     try:
         if m.text.lower() == "/channels":
             ch = [str(i) for i in channel]
+            if not ch:
+              return await m.reply_text("No channel is added use `/addchannel` to add one")
             req = ", ".join(ch)
             return await m.reply_text(f"Here is the list of channel:\n`{req}`")
-        elif m.text.lower() == "/default":
-            return await m.reply_text(f"The Default chat is `{default[0]}`")
+        elif m.text.lower() == "/default": 
+          if not default: 
+            return await m.reply_text("No default channel is set use `/apdefault` to add one")
+          return await m.reply_text(f"The Default chat is `{default[0]}`")
         else:
             sudoers = [str(sudo) for sudo in SUDOER]
+            if not sudoers:
+              return await m.reply_text("No sudoers are added use `/addsudo` to add one")
             req = ", ".join(sudoers)
             return await m.reply_text(f"Here is the list of channel:\n`{req}`")
     except Exception as e:
