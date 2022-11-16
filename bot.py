@@ -250,7 +250,7 @@ async def channel_sudo(_, m: Message):
         else:
             sudoers = [str(sudo) for sudo in SUDOER]
             req = ", ".join(sudoers)
-            return m.reply_text(f"Here is the list of channel:\n`{req}`")
+            return await m.reply_text(f"Here is the list of channel:\n`{req}`")
     except Exception as e:
         return await m.reply_text(f"Got an error:\n{e}")
 
