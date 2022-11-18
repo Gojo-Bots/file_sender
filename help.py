@@ -1,3 +1,5 @@
+from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+
 helpmsg = """**Here are the list of available commands:**
 
 /addchannel <channel id> = `Add channel to list for forwarding message.`
@@ -19,3 +21,25 @@ The bot will send the file (which have caption containing  chat id) to the given
 """
 
 exe = (".png", ".jpeg", ".jpg")
+
+start_kb = InlineKeyboardMarkup(
+    [
+        [
+            InlineKeyboardButton("Owner 👑", url="https://PSYREX.t.me",),
+            InlineKeyboardButton("Second Id  ✨", url="https://not_PSYREX.t.me",)
+        ],
+        [
+            InlineKeyboardButton("Help 🤓", callback_data="help"),
+            InlineKeyboardButton("Close ❌", callback_data="close")
+        ],
+    ]
+)
+
+help_kb = InlineKeyboardMarkup(
+    [
+        [
+            InlineKeyboardButton("Back 🔙", callback_data="back"),
+            InlineKeyboardButton("Close ❌", callback_data="close")
+        ]
+    ]
+)

@@ -3,10 +3,11 @@ import os
 from pyrogram import Client, filters
 from pyrogram.enums import ChatType
 # from pyrogram.errors import RPCError
-from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message
+from pyrogram.types import (CallbackQuery, InlineKeyboardButton,
+                            InlineKeyboardMarkup, Message)
 
 from configs import *
-from extra import *
+# from extra import *
 from help import *
 
 psy = Client(
@@ -59,7 +60,8 @@ async def start(_, m: Message):
     else:
         await psy.send_message(
             m.chat.id,
-            "Forward me any media or message I will forward to the targeted chat.\nUse /help to see the list of commands"
+            "Forward me any media or message I will forward to the targeted chat.\nUse /help to see the list of commands",
+            reply_markup=start_kb,
         )
     return
     
@@ -84,7 +86,8 @@ async def help(_, m: Message):
     else:
         await psy.send_message(
             m.chat.id,
-            helpmsg
+            helpmsg,
+            reply_markup=help_kb,
         )
     return
 
@@ -205,8 +208,13 @@ async def forwardto(_, m: Message):
         return await m.reply_text(f"Got an error:\n{e}")
     if not file:
         return await m.reply_text("I can't download that!")
+    z = replied
+    fsplit = file.split("/")
+    name = fsplit[-1]
+    path = "/".join(fsplit[0:-2])
+    os.rename(file, f"{path}/@PsywallsBot_{name}")
+    file = f"{path}/@PsywallsBot_{name}"
     try:
-        z = replied
         if replied.caption:
             if m.photo or file.endswith(exe):
                 x = await psy.send_photo(c_id, file, caption)
@@ -235,14 +243,20 @@ async def channel_sudo(_, m: Message):
     try:
         if m.text.lower() == "/channels":
             ch = [str(i) for i in channel]
+            if not ch:
+              return await m.reply_text("No channel is added use `/addchannel` to add one")
             req = ", ".join(ch)
             return await m.reply_text(f"Here is the list of channel:\n`{req}`")
-        elif m.text.lower() == "/default":
-            return await m.reply_text(f"The Default chat is `{default[0]}`")
+        elif m.text.lower() == "/default": 
+          if not default: 
+            return await m.reply_text("No default channel is set use `/apdefault` to add one")
+          return await m.reply_text(f"The Default chat is `{default[0]}`")
         else:
             sudoers = [str(sudo) for sudo in SUDOER]
+            if not sudoers:
+              return await m.reply_text("No sudoers are added use `/addsudo` to add one")
             req = ", ".join(sudoers)
-            return m.reply_text(f"Here is the list of channel:\n`{req}`")
+            return await m.reply_text(f"Here is the list of channel:\n`{req}`")
     except Exception as e:
         return await m.reply_text(f"Got an error:\n{e}")
 
@@ -294,6 +308,11 @@ async def forwarder(_, m: Message):
             return await m.reply_text(f"Got an error:\n{e}")
         if not file:
             return await m.reply_text("I can't download that!")
+        fsplit = file.split("/")
+        name = fsplit[-1]
+        path = "/".join(fsplit[0:-2])
+        os.rename(file, f"{path}/@PsywallsBot_{name}")
+        file = f"{path}/@PsywallsBot_{name}"
         if m.caption:
             splited = caption.split()[-1]
             try:
@@ -393,4 +412,32 @@ async def forwarder(_, m: Message):
     else:
         pass
 
+@psy.on_callback_query()
+async def callbacks(_,q: CallbackQuery):
+    try:
+        data = q.data
+        if data == "close":
+            await q.message.delete()
+            await q.answer("Closed")
+            return
+        elif data == "help":
+            await q.edit_message_text(
+                helpmsg,
+                reply_markup=help_kb
+            )
+            await q.answer("Help")
+            return
+        elif data == "back":
+            await q.edit_message_text(
+                "Forward me any media or message I will forward to the targeted chat.\nUse /help to see the list of commands",
+                reply_markup=start_kb
+            )
+            return await q.answer("Back")
+    except Exception as e:
+        c_id = q.message.chat.id
+        await q.message.delete()
+        return await psy.send_message(
+            c_id,
+            f"Got an error while handeling the callback quer:\n{e}")
+    
 psy.run()
