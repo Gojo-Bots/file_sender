@@ -418,14 +418,14 @@ async def callbacks(_,q: CallbackQuery):
         data = q.data
         if data == "close":
             await q.message.delete()
-            await q.answer("Closed the menu")
+            await q.answer("Closed")
             return
         elif data == "help":
             await q.edit_message_text(
                 helpmsg,
                 reply_markup=help_kb
             )
-            await q.answer("Here is the help menu")
+            await q.answer("Help")
             return
         elif data == "back":
             await q.edit_message_text(
