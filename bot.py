@@ -321,8 +321,8 @@ async def forwarder(_, m: Message):
                 caption = caption.strip(str(c_id))
                 if m.photo or file.endswith(exe):
                     x = await psy.send_photo(c_id, file, caption)
+                    await sleep(3)
                     await x.reply_document(file)
-                    await sleep(2)
                     os.remove(file)
                     return await m.reply_text("Done!")
                 if m.document:
@@ -342,8 +342,8 @@ async def forwarder(_, m: Message):
                     if m.photo or file.endswith(exe):
                         if m.caption:
                             x = await psy.send_photo(c_id, file, caption)
+                            await sleep(3)
                             await x.reply_document(file)
-                            await sleep(2)
                         if not m.caption:
                             x = await psy.send_photo(c_id, file)
                             await x.reply_document(file)
@@ -368,12 +368,12 @@ async def forwarder(_, m: Message):
                     if m.photo or file.endswith(exe):
                         if m.caption:
                             x = await psy.send_photo(c_id, file, caption)
+                            await sleep(3)
                             await x.reply_document(file)
-                            await sleep(2)
                         if not m.caption:
                             x = await psy.send_photo(c_id, file)
+                            await sleep(3)
                             await x.reply_document(file)
-                            await sleep(2)
                         os.remove(file)
                         return await m.reply_text("Done!")
                     if m.document:
@@ -394,8 +394,8 @@ async def forwarder(_, m: Message):
             if m.photo or file.endswith(exe):
                 if m.caption:
                     x = await psy.send_photo(c_id, file, caption)
+                    await sleep(3)
                     await x.reply_document(file)
-                    await sleep(2)
                 if not m.caption:
                     x = await psy.send_photo(c_id, file)
                     await x.reply_document(file)
