@@ -1,4 +1,5 @@
 import os
+from asyncio import sleep
 
 from pyrogram import Client, filters
 from pyrogram.enums import ChatType
@@ -321,6 +322,7 @@ async def forwarder(_, m: Message):
                 if m.photo or file.endswith(exe):
                     x = await psy.send_photo(c_id, file, caption)
                     await x.reply_document(file)
+                    await sleep(2)
                     os.remove(file)
                     return await m.reply_text("Done!")
                 if m.document:
@@ -341,6 +343,7 @@ async def forwarder(_, m: Message):
                         if m.caption:
                             x = await psy.send_photo(c_id, file, caption)
                             await x.reply_document(file)
+                            await sleep(2)
                         if not m.caption:
                             x = await psy.send_photo(c_id, file)
                             await x.reply_document(file)
@@ -366,9 +369,11 @@ async def forwarder(_, m: Message):
                         if m.caption:
                             x = await psy.send_photo(c_id, file, caption)
                             await x.reply_document(file)
+                            await sleep(2)
                         if not m.caption:
                             x = await psy.send_photo(c_id, file)
                             await x.reply_document(file)
+                            await sleep(2)
                         os.remove(file)
                         return await m.reply_text("Done!")
                     if m.document:
@@ -390,6 +395,7 @@ async def forwarder(_, m: Message):
                 if m.caption:
                     x = await psy.send_photo(c_id, file, caption)
                     await x.reply_document(file)
+                    await sleep(2)
                 if not m.caption:
                     x = await psy.send_photo(c_id, file)
                     await x.reply_document(file)
