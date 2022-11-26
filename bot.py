@@ -345,7 +345,6 @@ async def forwarder(_, m: Message):
                     if m.photo or file.endswith(exe):
                         if m.caption:
                             await pic_sender(c_id, file, caption)
-                            await x.reply_document(file)
                         if not m.caption:
                             await pic_sender(c_id, file, False)
                         os.remove(file)
