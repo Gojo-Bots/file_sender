@@ -38,13 +38,13 @@ SUDOER = list(
 default = [-1001747117888]
 
 async def pic_sender(chat_id: int, path: str, caption):
-  if caption:
-    x = await psy.send_photo(chat_id, path, caption)
+    if caption:
+        x = await psy.send_photo(chat_id, path, caption)
+        await x.reply_document(path)
+        return
+    x = await psy.send_photo(chat_id, path)
     await x.reply_document(path)
     return
-  x = await psy.send_photo(chat_id, path)
-  await x.reply_document(path)
-  return
 
 @psy.on_message(filters.command(["start"], pre))
 async def start(_, m: Message):
