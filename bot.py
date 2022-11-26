@@ -319,97 +319,79 @@ async def forwarder(_, m: Message):
         path = "/".join(fsplit[0:-2])
         os.rename(file, f"{path}/@PsywallsBot_{name}")
         file = f"{path}/@PsywallsBot_{name}"
+        path = []
+        path.append(file)
         if m.caption:
             splited = caption.split()[-1]
             try:
                 c_id = int(splited)
                 caption = caption.strip(str(c_id))
-                if m.photo or file.endswith(exe):
-                    await pic_sender(c_id, file, caption)
-                    os.remove(file)
-                    return await m.reply_text("Done!")
-                if m.document:
-                    await psy.send_document(c_id, file, caption=caption)
-                    os.remove(file)
-                    return await m.reply_text("Done!")
-                if m.video:
-                    await psy.send_video(c_id, file, caption=caption)
-                    os.remove(file)
-                    return await m.reply_text("Done!")
+                async for file in path:
+                  if m.photo or file.endswith(exe):
+                      await pic_sender(c_id, file, caption)
+                      os.remove(file)
+                      return await m.reply_text("Done!")
+                  if m.document:
+                      await psy.send_document(c_id, file, caption=caption)
+                      os.remove(file)
+                      return await m.reply_text("Done!")
+                  if m.video:
+                      await psy.send_video(c_id, file, caption=caption)
+                      os.remove(file)
+                      return await m.reply_text("Done!")
             except Exception:
                 pass
         try:
             if not default:
-                if len(channel) == 1:
-                    c_id = channel[0]
-                    if m.photo or file.endswith(exe):
-                        if m.caption:
-                            await pic_sender(c_id, file, caption)
-                        if not m.caption:
-                            await pic_sender(c_id, file, False)
-                        os.remove(file)
-                        return await m.reply_text("Done!")
-                    if m.document:
-                        if m.caption:
-                            await psy.send_document(c_id, file, caption=caption)
-                        if not m.caption:
-                            await psy.send_document(c_id, file)
-                        os.remove(file)
-                        return await m.reply_text("Done!")
-                    if m.video:
-                        if m.caption:
-                            await psy.send_video(c_id, file, caption=caption)
-                        if not m.caption:
-                            await psy.send_video(c_id, file)
-                        os.remove(file)
-                        return await m.reply_text("Done!")
                 channel = list(set(channel))
                 async for c_id in channel:
-                    if m.photo or file.endswith(exe):
-                        if m.caption:
-                            await pic_sender(c_id, file, caption)
-                        if not m.caption:
-                            await pic_sender(c_id, file, False)
-                        os.remove(file)
-                        return await m.reply_text("Done!")
-                    if m.document:
-                        if m.caption:
-                            await psy.send_document(c_id, file, caption=caption)
-                        if not m.caption:
-                            await psy.send_document(c_id, file)
-                        os.remove(file)
-                        return await m.reply_text("Done!")
-                    if m.video:
-                        if m.caption:
-                            await psy.send_video(c_id, file, caption=caption)
-                        if not m.caption:
-                            await psy.send_video(c_id, file)
-                        os.remove(file)
-                        return await m.reply_text("Done!")
+                  async for file in path:
+                      if m.photo or file.endswith(exe):
+                          if m.caption:
+                              await pic_sender(c_id, file, caption)
+                          if not m.caption:
+                              await pic_sender(c_id, file, False)
+                          os.remove(file)
+                          return await m.reply_text("Done!")
+                      if m.document:
+                          if m.caption:
+                              await psy.send_document(c_id, file, caption=caption)
+                          if not m.caption:
+                              await psy.send_document(c_id, file)
+                          os.remove(file)
+                          return await m.reply_text("Done!")
+                      if m.video:
+                          if m.caption:
+                              await psy.send_video(c_id, file, caption=caption)
+                          if not m.caption:
+                              await psy.send_video(c_id, file)
+                          os.remove(file)
+                          return await m.reply_text("Done!")
             c_id = default[0]
-            if m.photo or file.endswith(exe):
-                if m.caption:
-                    await pic_sender(c_id, file, caption)
-                if not m.caption:
-                    await pic_sender(c_id, file, False)
-                os.remove(file)
-                return await m.reply_text("Done!")
-            if m.document:
-                if m.caption:
-                    await psy.send_document(c_id, file, caption=caption)
-                if not m.caption:
-                    await psy.send_document(c_id, file)
-                os.remove(file)
-                return await m.reply_text("Done!")
-            if m.video:
-                if m.caption:
-                    await psy.send_video(c_id, file, caption=caption)
-                if not m.caption:
-                    await psy.send_video(c_id, file)
-        except Exception as e:
-            return await m.reply_text(f"Got an error:\n{e}")
+            async for file in path:
+              if m.photo or file.endswith(exe):
+                  if m.caption:
+                      await pic_sender(c_id, file, caption)
+                  if not m.caption:
+                      await pic_sender(c_id, file, False)
+                  os.remove(file)
+                  return await m.reply_text("Done!")
+              if m.document:
+                  if m.caption:
+                      await psy.send_document(c_id, file, caption=caption)
+                  if not m.caption:
+                      await psy.send_document(c_id, file)
+                  os.remove(file)
+                  return await m.reply_text("Done!")
+              if m.video:
+                  if m.caption:
+                      await psy.send_video(c_id, file, caption=caption)
+                  if not m.caption:
+                      await psy.send_video(c_id, file)
+          except Exception as e:
+              return await m.reply_text(f"Got an error:\n{e}")
     else:
-        pass
+        return
 
 @psy.on_callback_query()
 async def callbacks(_,q: CallbackQuery):
