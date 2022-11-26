@@ -1,5 +1,4 @@
 import os
-from asyncio import sleep
 
 from pyrogram import Client, filters
 from pyrogram.enums import ChatType
@@ -38,6 +37,14 @@ SUDOER = list(
 
 default = [-1001747117888]
 
+async def pic_sender(chat_id: int, path: str, caption):
+  if caption:
+    x = await psy.send_photo(chat_id, path, caption)
+    await x.reply_document(path)
+    return
+  x = await psy.send_photo(chat_id, path)
+  await x.reply_document(path)
+  return
 
 @psy.on_message(filters.command(["start"], pre))
 async def start(_, m: Message):
@@ -218,16 +225,14 @@ async def forwardto(_, m: Message):
     try:
         if replied.caption:
             if m.photo or file.endswith(exe):
-                x = await psy.send_photo(c_id, file, caption)
-                await x.reply_document(file)
+                await pic_sender(c_id, file, caption)
             if z.document:
                 await psy.send_document(c_id, file, caption)
             if z.video:
                 await psy.send_video(c_id, file, caption)
         else:
             if z.photo or file.endswith(exe):
-                x = await psy.send_photo(c_id, file)
-                await x.reply_document(file)
+                await pic_sender(c_id, file, False)
             if z.document:
                 await psy.send_document(c_id, file)
             if z.video:
@@ -320,9 +325,7 @@ async def forwarder(_, m: Message):
                 c_id = int(splited)
                 caption = caption.strip(str(c_id))
                 if m.photo or file.endswith(exe):
-                    x = await psy.send_photo(c_id, file, caption)
-                    await sleep(3)
-                    await x.reply_document(file)
+                    await pic_sender(c_id, file, caption)
                     os.remove(file)
                     return await m.reply_text("Done!")
                 if m.document:
@@ -341,12 +344,10 @@ async def forwarder(_, m: Message):
                     c_id = channel[0]
                     if m.photo or file.endswith(exe):
                         if m.caption:
-                            x = await psy.send_photo(c_id, file, caption)
-                            await sleep(3)
+                            await pic_sender(c_id, file, caption)
                             await x.reply_document(file)
                         if not m.caption:
-                            x = await psy.send_photo(c_id, file)
-                            await x.reply_document(file)
+                            await pic_sender(c_id, file, False)
                         os.remove(file)
                         return await m.reply_text("Done!")
                     if m.document:
@@ -367,13 +368,9 @@ async def forwarder(_, m: Message):
                 async for c_id in channel:
                     if m.photo or file.endswith(exe):
                         if m.caption:
-                            x = await psy.send_photo(c_id, file, caption)
-                            await sleep(3)
-                            await x.reply_document(file)
+                            await pic_sender(c_id, file, caption)
                         if not m.caption:
-                            x = await psy.send_photo(c_id, file)
-                            await sleep(3)
-                            await x.reply_document(file)
+                            await pic_sender(c_id, file, False)
                         os.remove(file)
                         return await m.reply_text("Done!")
                     if m.document:
@@ -393,12 +390,9 @@ async def forwarder(_, m: Message):
             c_id = default[0]
             if m.photo or file.endswith(exe):
                 if m.caption:
-                    x = await psy.send_photo(c_id, file, caption)
-                    await sleep(3)
-                    await x.reply_document(file)
+                    await pic_sender(c_id, file, caption)
                 if not m.caption:
-                    x = await psy.send_photo(c_id, file)
-                    await x.reply_document(file)
+                    await pic_sender(c_id, file, False)
                 os.remove(file)
                 return await m.reply_text("Done!")
             if m.document:
