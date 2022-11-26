@@ -326,7 +326,7 @@ async def forwarder(_, m: Message):
             try:
                 c_id = int(splited)
                 caption = caption.strip(str(c_id))
-                async for file in path:
+                for file in path:
                     if m.photo or file.endswith(exe):
                         await pic_sender(c_id, file, caption)
                     if m.document and not file.endswith(exe):
