@@ -367,6 +367,7 @@ async def forwarder(_, m: Message):
                               await psy.send_video(c_id, file)
                           os.remove(file)
                           return await m.reply_text("Done!")
+        try:
             c_id = default[0]
             async for file in path:
               if m.photo or file.endswith(exe):
@@ -388,8 +389,8 @@ async def forwarder(_, m: Message):
                       await psy.send_video(c_id, file, caption=caption)
                   if not m.caption:
                       await psy.send_video(c_id, file)
-          except Exception as e:
-              return await m.reply_text(f"Got an error:\n{e}")
+      except Exception as e:
+          return await m.reply_text(f"Got an error:\n{e}")
     else:
         return
 
