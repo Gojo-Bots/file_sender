@@ -299,7 +299,7 @@ async def rm_default(_, m: Message):
     except Exception as e:
         return await m.reply_text(f"Got an error:\n{e}")
 
-@psy.on_message(filters.private & (filters.photo | filters.document | filters.video))
+@psy.on_message(filters.private & filters.media)
 async def forwarder(_, m: Message):
     # me = await psy.get_me()
     # BOT_ID = me.id
