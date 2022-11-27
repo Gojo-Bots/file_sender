@@ -229,16 +229,16 @@ async def forwardto(_, m: Message):
         if replied.caption:
             if m.photo or file.endswith(exe):
                 await pic_sender(c_id, file, caption)
-            if z.document:
+            elif z.document:
                 await psy.send_document(c_id, file, caption)
-            if z.video:
+            elif z.video:
                 await psy.send_video(c_id, file, caption)
         else:
             if z.photo or file.endswith(exe):
                 await pic_sender(c_id, file, False)
-            if z.document:
+            elif z.document:
                 await psy.send_document(c_id, file)
-            if z.video:
+            elif z.video:
                 await psy.send_video(c_id, file)
         os.remove(file)
         return await m.reply_text("Done!")
@@ -332,9 +332,9 @@ async def forwarder(_, m: Message):
                 for file in path:
                     if m.photo or file.endswith(exe):
                         await pic_sender(c_id, file, caption)
-                    if m.document and not file.endswith(exe):
+                    elif m.document:
                         await psy.send_document(c_id, file, caption=caption)
-                    if m.video:
+                    elif m.video:
                         await psy.send_video(c_id, file, caption=caption)
                 os.remove(file)
                 path.clear()
@@ -349,17 +349,17 @@ async def forwarder(_, m: Message):
                         if m.photo or file.endswith(exe):
                             if m.caption:
                                 await pic_sender(c_id, file, caption)
-                            if not m.caption:
+                            elif not m.caption:
                                 await pic_sender(c_id, file, False)
-                        if m.document and not file.endswith(exe):
+                        elif m.document:
                             if m.caption:
                                 await psy.send_document(c_id, file, caption=caption)
-                            if not m.caption:
+                            elif not m.caption:
                                 await psy.send_document(c_id, file)
-                        if m.video:
+                        elif m.video:
                             if m.caption:
                                 await psy.send_video(c_id, file, caption=caption)
-                            if not m.caption:
+                            elif not m.caption:
                               await psy.send_video(c_id, file)
                     os.remove(file)
                     path.clear()
@@ -369,17 +369,17 @@ async def forwarder(_, m: Message):
                 if m.photo or file.endswith(exe):
                     if m.caption:
                         await pic_sender(c_id, file, caption)
-                    if not m.caption:
+                    elif not m.caption:
                         await pic_sender(c_id, file, False)
-                if m.document and not file.endswith(exe):
+                elif m.document:
                     if m.caption:
                         await psy.send_document(c_id, file, caption=caption)
-                    if not m.caption:
+                    elif not m.caption:
                         await psy.send_document(c_id, file)
-                if m.video:
+                elif m.video:
                     if m.caption:
                         await psy.send_video(c_id, file, caption=caption)
-                    if not m.caption:
+                    elif not m.caption:
                         await psy.send_video(c_id, file)
             os.remove(file)
             path.clear()
