@@ -42,9 +42,11 @@ async def pic_sender(chat_id: int, path: str, caption):
     if caption:
         x = await psy.send_photo(chat_id, path, caption)
         await x.reply_document(path)
+        await sleep(10)
         return
     x = await psy.send_photo(chat_id, path)
     await x.reply_document(path)
+    await sleep(10)
     return
 
 @psy.on_message(filters.command(["start"], pre))
@@ -330,7 +332,6 @@ async def forwarder(_, m: Message):
                 for file in path:
                     if m.photo or file.endswith(exe):
                         await pic_sender(c_id, file, caption)
-                        await sleep(10)
                     if m.document and not file.endswith(exe):
                         await psy.send_document(c_id, file, caption=caption)
                     if m.video:
@@ -348,10 +349,8 @@ async def forwarder(_, m: Message):
                         if m.photo or file.endswith(exe):
                             if m.caption:
                                 await pic_sender(c_id, file, caption)
-                                await sleep(10)
                             if not m.caption:
                                 await pic_sender(c_id, file, False)
-                                await sleep(10)
                         if m.document and not file.endswith(exe):
                             if m.caption:
                                 await psy.send_document(c_id, file, caption=caption)
@@ -370,10 +369,8 @@ async def forwarder(_, m: Message):
                 if m.photo or file.endswith(exe):
                     if m.caption:
                         await pic_sender(c_id, file, caption)
-                        await sleep(10)
                     if not m.caption:
                         await pic_sender(c_id, file, False)
-                        await sleep(10)
                 if m.document and not file.endswith(exe):
                     if m.caption:
                         await psy.send_document(c_id, file, caption=caption)
