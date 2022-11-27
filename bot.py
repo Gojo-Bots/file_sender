@@ -42,11 +42,11 @@ async def pic_sender(chat_id: int, path: str, caption):
     if caption:
         x = await psy.send_photo(chat_id, path, caption)
         await x.reply_document(path)
-        await sleep(10)
+        sleep(10)
         return
     x = await psy.send_photo(chat_id, path)
     await x.reply_document(path)
-    await sleep(10)
+    sleep(10)
     return
 
 @psy.on_message(filters.command(["start"], pre))
