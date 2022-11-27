@@ -1,5 +1,5 @@
-from asyncio import sleep
 import os
+from time import sleep
 
 from pyrogram import Client, filters
 from pyrogram.enums import ChatType
