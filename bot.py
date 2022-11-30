@@ -37,13 +37,35 @@ SUDOER = list(
 
 default = [-1001747117888]
 
-async def pic_sender(chat_id: int, path: str, caption):
-    if caption:
-        x = await psy.send_photo(chat_id, path, caption)
+yus = []
+
+async def pic_sender():
+    for OwO in yus:
+        caption = OwO["caption"]
+        path = OwO["file"]
+        if len(OwO) == 3:
+            chat_id = OwO["id"]
+            x = await psy.send_photo(chat_id, path, caption)
+            await x.reply_document(path)
+            os.remove(path)
+        if not default:
+            for chat_id in channel:
+                if caption:
+                    x = await psy.send_photo(chat_id, path, caption)
+                    await x.reply_document(path)
+                    return
+                x = await psy.send_photo(chat_id, path)
+                await x.reply_document(path)
+                os.remove(path)
+        chat_id = default[0]
+        if caption:
+            x = await psy.send_photo(chat_id, path, caption)
+            await x.reply_document(path)
+            os.remove(path)
+        x = await psy.send_photo(chat_id, path)
         await x.reply_document(path)
-        return
-    x = await psy.send_photo(chat_id, path)
-    await x.reply_document(path)
+        os.remove(path)
+    yus.clear()
     return
 
 @psy.on_message(filters.command(["start"], pre))
@@ -225,14 +247,16 @@ async def forwardto(_, m: Message):
     try:
         if replied.caption:
             if m.photo or file.endswith(exe):
-                await pic_sender(c_id, file, caption)
+                x = await psy.send_photo(c_id, file, caption)
+                await x.reply_document(file)
             elif z.document:
                 await psy.send_document(c_id, file, caption)
             elif z.video:
                 await psy.send_video(c_id, file, caption)
         else:
             if z.photo or file.endswith(exe):
-                await pic_sender(c_id, file, False)
+                x = await psy.send_photo(c_id, file, caption)
+                await x.reply_document(file)
             elif z.document:
                 await psy.send_document(c_id, file)
             elif z.video:
@@ -299,6 +323,21 @@ async def rm_default(_, m: Message):
     except Exception as e:
         return await m.reply_text(f"Got an error:\n{e}")
 
+@psy.on_message(filters.command(["send", "upload"], pre))
+async def pic_uploader(_, m: Message):
+    if m.from_user.id not in SUDOER:
+        return await m.reply_text("You can't do that")
+    if not yus:
+        return await m.reply_text("No file to upload.\nSee help to know more")
+    try:
+      x = await m.reply_text("Uploading in process..")
+      await pic_sender()
+      await x.delete()
+      await m.reply_text("Successfully uploaded the files")
+      return
+    except Exception as e:
+        return await m.reply_text(f"Got an error:\n{e}")
+
 @psy.on_message(filters.private & filters.media)
 async def forwarder(_, m: Message):
     # me = await psy.get_me()
@@ -319,67 +358,69 @@ async def forwarder(_, m: Message):
         path = "/".join(fsplit[0:-2])
         os.rename(file, f"{path}/@PsywallsBot_{name}")
         file = f"{path}/@PsywallsBot_{name}"
-        path = []
-        path.append(file)
         if m.caption:
             splited = caption.split()[-1]
             try:
                 c_id = int(splited)
                 caption = caption.strip(str(c_id))
-                for file in path:
-                    if m.photo or file.endswith(exe):
-                        await pic_sender(c_id, file, caption)
-                    elif m.document:
-                        await psy.send_document(c_id, file, caption=caption)
-                    elif m.video:
-                        await psy.send_video(c_id, file, caption=caption)
-                os.remove(file)
-                path.clear()
-                return await m.reply_text("Done!")
+                if m.photo or file.endswith(exe):
+                    yus.append({"file":file, "id": c_id, "caption": caption})
+                    return await m.reply_text("Done!")
+                elif m.document:
+                    await psy.send_document(c_id, file, caption=caption)
+                    os.remove(file)
+                    return await m.reply_text("Done!")
+                elif m.video:
+                    await psy.send_video(c_id, file, caption=caption)
+                    os.remove(file)
+                    return await m.reply_text("Done!")
             except Exception:
                 pass
         try:
             if not default:
                 channel = list(set(channel))
                 for c_id in channel:
-                    for file in path:
-                        if m.photo or file.endswith(exe):
-                            if m.caption:
-                                await pic_sender(c_id, file, caption)
-                            elif not m.caption:
-                                await pic_sender(c_id, file, False)
-                        elif m.document:
-                            if m.caption:
-                                await psy.send_document(c_id, file, caption=caption)
-                            elif not m.caption:
+                    if m.photo or file.endswith(exe):
+                        if m.caption:
+                            yus.append({"file":file, "caption": caption})
+                        elif not m.caption:
+                            yus.append({"file":file, "caption": False})
+                        return await m.reply_text("Done!")
+                    elif m.document:
+                        if m.caption:
+                            await psy.send_document(c_id, file, caption=caption)
+                        elif not m.caption:
                                 await psy.send_document(c_id, file)
-                        elif m.video:
-                            if m.caption:
-                                await psy.send_video(c_id, file, caption=caption)
-                            elif not m.caption:
-                              await psy.send_video(c_id, file)
-                    os.remove(file)
-                    path.clear()
-                    return await m.reply_text("Done!")
+                        os.remove(file)
+                        return await m.reply_text("Done!")
+                    elif m.video:
+                        if m.caption:
+                            await psy.send_video(c_id, file, caption=caption)
+                        elif not m.caption:
+                            await psy.send_video(c_id, file)
+                        os.remove(file)
+                        return await m.reply_text("Done!")
             c_id = default[0]
-            for file in path:
-                if m.photo or file.endswith(exe):
-                    if m.caption:
-                        await pic_sender(c_id, file, caption)
-                    elif not m.caption:
-                        await pic_sender(c_id, file, False)
-                elif m.document:
-                    if m.caption:
-                        await psy.send_document(c_id, file, caption=caption)
-                    elif not m.caption:
-                        await psy.send_document(c_id, file)
-                elif m.video:
-                    if m.caption:
-                        await psy.send_video(c_id, file, caption=caption)
-                    elif not m.caption:
-                        await psy.send_video(c_id, file)
-            os.remove(file)
-            path.clear()
+            if m.photo or file.endswith(exe):
+                if m.caption:
+                    yus.append({"file":file, "caption": caption})
+                elif not m.caption:
+                    yus.append({"file":file, "caption": False})
+                return await m.reply_text("Done!")
+            elif m.document:
+                if m.caption:
+                    await psy.send_document(c_id, file, caption=caption)
+                elif not m.caption:
+                    await psy.send_document(c_id, file)
+                os.remove(file)
+                return await m.reply_text("Done!")
+            elif m.video:
+                if m.caption:
+                    await psy.send_video(c_id, file, caption=caption)
+                elif not m.caption:
+                    await psy.send_video(c_id, file)
+                os.remove(file)
+                return await m.reply_text("Done!")
         except Exception as e:
           return await m.reply_text(f"Got an error:\n{e}")
     else:
