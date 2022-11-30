@@ -330,9 +330,11 @@ async def pic_uploader(_, m: Message):
     if not yus:
         return await m.reply_text("No file to upload.\nSee help to know more")
     try:
-        await pic_sender()
-        await m.reply_text("Successfully uploaded the files")
-        return
+      x = await m.reply_text("Uploading in process..")
+      await pic_sender()
+      await x.delete()
+      await m.reply_text("Successfully uploaded the files")
+      return
     except Exception as e:
         return await m.reply_text(f"Got an error:\n{e}")
 
