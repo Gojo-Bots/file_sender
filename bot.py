@@ -255,7 +255,8 @@ async def forwardto(_, m: Message):
                 await psy.send_video(c_id, file, caption)
         else:
             if z.photo or file.endswith(exe):
-                await pic_sender(c_id, file, False)
+                x = await psy.send_photo(c_id, file, caption)
+                await x.reply_document(file)
             elif z.document:
                 await psy.send_document(c_id, file)
             elif z.video:
