@@ -1,5 +1,5 @@
 # psyrex_bot
-Bot which will forward content to channel
+Bot which will upload content to channel
 
 # Main Branch Deploy 
 
@@ -10,9 +10,11 @@ Bot which will forward content to channel
 [![DEPLOY](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/iamgojoof6eyes/psyrex_bot/tree/beta)
 
 
-# Credits
+# Credits 💫
 [Dan](https://github.com/delivrance) for pyrogram
+
 [Psyrex](https://github.com/superPSYREX) for idea
+
 [Me](https://github.com/iamgojoof6eyes) for nothing
 
 # Powered by [ɢօʝօ ɮօȶֆ](https://github.com/Gojo-Bots)
