@@ -242,7 +242,7 @@ async def forwardto(_, m: Message):
     fsplit = file.split("/")
     name = fsplit[-1]
     path = "/".join(fsplit[0:-2])
-    os.rename(file, f"{path}/@PsywallsBot_{name}")
+    os.rename(file, f"{path}/@{BOT_USERNAME}_{name}")
     file = f"{path}/@PsywallsBot_{name}"
     try:
         if replied.caption:
@@ -357,7 +357,7 @@ async def forwarder(_, m: Message):
         name = fsplit[-1]
         path = "/".join(fsplit[0:-2])
         os.rename(file, f"{path}/@PsywallsBot_{name}")
-        file = f"{path}/@PsywallsBot_{name}"
+        file = f"{path}/@{BOT_USERNAME}_{name}"
         if m.caption:
             splited = caption.split()[-1]
             try:
