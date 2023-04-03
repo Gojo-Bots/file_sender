@@ -1,6 +1,6 @@
 import os
 
-from pyrogram import Client, filters
+from pyrogram import filters
 from pyrogram.enums import ChatType
 # from pyrogram.errors import RPCError
 from pyrogram.types import (CallbackQuery, InlineKeyboardButton,
@@ -9,13 +9,9 @@ from pyrogram.types import (CallbackQuery, InlineKeyboardButton,
 from configs import *
 # from extra import *
 from help import *
+from Powers import *
 
-psy = Client(
-    "psy",
-    api_id=API_ID,
-    api_hash=API_HASH,
-    bot_token=BOT_TOKEN
-)
+psy.edit_message_text()
 
 pre = PREFIX_HANDLER
 CT = ChatType
@@ -68,10 +64,15 @@ async def pic_sender():
     yus.clear()
     return
 
+async def __init__():
+    me = await psy.get_me()
+    Config.BOT_ID = me.id
+    Config.BOT_NAME = me.first_name + (me.last_name if me.last_name else "")
+    Config.BOT_USERNAME = me.username
+
+
 @psy.on_message(filters.command(["start"], pre))
 async def start(_, m: Message):
-    me = await psy.get_me()
-    BOT_USERNAME = me.username
     if m.chat.type != CT.PRIVATE:
         await m.reply_text(
             "I am alive",
@@ -80,20 +81,30 @@ async def start(_, m: Message):
                     [
                         InlineKeyboardButton(
                         "Switch to pm", 
-                        url=f"https://{BOT_USERNAME}.t.me",
+                        url=f"https://t.me/{Config.BOT_USERNAME}?start=start_start",
                         ),
                     ],
                 ],
             )
         )
-
+        return
     else:
-        await psy.send_message(
-            m.chat.id,
-            "Forward me any media or message I will forward to the targeted chat.\nUse /help to see the list of commands",
-            reply_markup=start_kb,
-        )
-    return
+        if len(m.text.split()) > 1:
+            help_option = (m.text.split(None, 1)[1]).lower()
+        if help_option.split("_")[1] == "help":
+            await psy.send_message(
+                m.chat.id,
+                "What do you want to see",
+                reply_markup=help_kb,
+            )
+            return
+        elif help_option.split("_")[1] == "start":
+            await psy.send_message(
+                m.chat.id,
+                "Forward me any media or message I will forward to the targeted chat.\nUse /help to see the list of commands",
+                reply_markup=start_kb,
+            )
+            return
     
 @psy.on_message(filters.command(["help"], pre))
 async def help(_, m: Message):
@@ -107,7 +118,7 @@ async def help(_, m: Message):
                     [
                         InlineKeyboardButton(
                         "Help", 
-                        url=f"t.me/{BOT_USERNAME}?start=help",
+                        url=f"t.me/{BOT_USERNAME}?start=start_help",
                         ),
                     ],
                 ],
@@ -116,7 +127,7 @@ async def help(_, m: Message):
     else:
         await psy.send_message(
             m.chat.id,
-            helpmsg,
+            "What do you want to see",
             reply_markup=help_kb,
         )
     return
@@ -230,8 +241,14 @@ async def forwardto(_, m: Message):
     z = replied
     if not bool(z.photo or z.document or z.video):
         return await m.reply_text("Reply to an image or document or video")
+    size, f_id = await size_fetcher(z)
     try:
-        file = await replied.download()
+        if size > 10:
+            file = f_id
+            to_dwl = False
+        else:
+            file = await m.download()
+            to_dwl = True
         if replied.caption:
             caption = replied.caption
     except Exception as e:
@@ -239,11 +256,12 @@ async def forwardto(_, m: Message):
     if not file:
         return await m.reply_text("I can't download that!")
     z = replied
-    fsplit = file.split("/")
-    name = fsplit[-1]
-    path = "/".join(fsplit[0:-2])
-    os.rename(file, f"{path}/@{BOT_USERNAME}_{name}")
-    file = f"{path}/@PsywallsBot_{name}"
+    if to_dwl:
+        fsplit = file.split("/")
+        name = fsplit[-1]
+        path = "/".join(fsplit[0:-2])
+        os.rename(file, f"{path}/@{Config.BOT_USERNAME}_{name}")
+        file = f"{path}/@PsywallsBot_{name}"
     try:
         if replied.caption:
             if m.photo or file.endswith(exe):
@@ -261,7 +279,8 @@ async def forwardto(_, m: Message):
                 await psy.send_document(c_id, file)
             elif z.video:
                 await psy.send_video(c_id, file)
-        os.remove(file)
+        if to_dwl:
+            os.remove(file)
         return await m.reply_text("Done!")
     except Exception as e:
         return await m.reply_text(f"Got an error:\n{e}")
@@ -342,28 +361,37 @@ async def pic_uploader(_, m: Message):
 async def forwarder(_, m: Message):
     # me = await psy.get_me()
     # BOT_ID = me.id
-    if m.from_user.id in SUDOER:
+    if m.from_user.id not in SUDOER:
+        return
+    elif m.from_user.id in SUDOER:
         if not bool(m.photo or m.document or m.video):
             return await m.reply_text("Send photo or document or video")
         if m.caption:
             caption = m.caption
+        size, f_id = await size_fetcher(m)
         try:
-            file = await m.download()
+            if size > 10:
+                file = f_id
+                to_dwl = False
+            else:
+                file = await m.download()
+                to_dwl = True
         except Exception as e:
             return await m.reply_text(f"Got an error:\n{e}")
         if not file:
             return await m.reply_text("I can't download that!")
-        fsplit = file.split("/")
-        name = fsplit[-1]
-        path = "/".join(fsplit[0:-2])
-        os.rename(file, f"{path}/@PsywallsBot_{name}")
-        file = f"{path}/@{BOT_USERNAME}_{name}"
+        if to_dwl:
+            fsplit = file.split("/")
+            name = fsplit[-1]
+            path = "/".join(fsplit[0:-2])
+            os.rename(file, f"{path}/@PsywallsBot_{name}")
+            file = f"{path}/@{Config.BOT_USERNAME}_{name}"
         if m.caption:
             splited = caption.split()[-1]
             try:
                 c_id = int(splited)
                 caption = caption.strip(str(c_id))
-                if m.photo or file.endswith(exe):
+                if m.photo or m.document.mime_type.split("/")[0]=="image":
                     yus.append({"file":file, "id": c_id, "caption": caption})
                     return await m.reply_text("Done!")
                 elif m.document:
@@ -391,15 +419,16 @@ async def forwarder(_, m: Message):
                             await psy.send_document(c_id, file, caption=caption)
                         elif not m.caption:
                                 await psy.send_document(c_id, file)
-                        os.remove(file)
                         return await m.reply_text("Done!")
                     elif m.video:
                         if m.caption:
                             await psy.send_video(c_id, file, caption=caption)
                         elif not m.caption:
                             await psy.send_video(c_id, file)
-                        os.remove(file)
+                        
                         return await m.reply_text("Done!")
+                    if to_dwl:
+                        os.remove(file)
             c_id = default[0]
             if m.photo or file.endswith(exe):
                 if m.caption:
@@ -412,18 +441,41 @@ async def forwarder(_, m: Message):
                     await psy.send_document(c_id, file, caption=caption)
                 elif not m.caption:
                     await psy.send_document(c_id, file)
-                os.remove(file)
                 return await m.reply_text("Done!")
             elif m.video:
                 if m.caption:
                     await psy.send_video(c_id, file, caption=caption)
                 elif not m.caption:
                     await psy.send_video(c_id, file)
+            if to_dwl:
                 os.remove(file)
                 return await m.reply_text("Done!")
         except Exception as e:
           return await m.reply_text(f"Got an error:\n{e}")
     else:
+        return
+
+@psy.on_callback_query(filters.regex("^help_lao"))
+async def help_lelo_guyz(_,q: CallbackQuery):
+    data = q.data.split("_")
+    typo = data[-1]
+    if typo == "back":
+        await q.edit_message_text(
+            "What do you want to see",
+            reply_markup=help_kb
+        )
+        return
+    elif typo == "bc":
+        await q.edit_message_text(
+            helpmsg2,
+            reply_markup=help_kb2
+        )
+        return
+    elif typo == "re":
+        await q.edit_message_text(
+            helpmsg1,
+            reply_markup=help_kb2
+        )
         return
 
 @psy.on_callback_query()
@@ -436,7 +488,7 @@ async def callbacks(_,q: CallbackQuery):
             return
         elif data == "help":
             await q.edit_message_text(
-                helpmsg,
+                "What do you want to see",
                 reply_markup=help_kb
             )
             await q.answer("Help")
@@ -454,4 +506,16 @@ async def callbacks(_,q: CallbackQuery):
             c_id,
             f"Got an error while handeling the callback quer:\n{e}")
     
-psy.run()
+async def size_fetcher(m: Message):
+    """Return the file size in mb's and id"""
+    if m.video:
+        size = m.video.file_size
+        id = m.video.file_id
+    elif m.document:
+        size = m.document.file_size
+        id = m.document.file_id
+    elif m.photo:
+        size = m.photo.file_size
+        id = m.photo.file_id
+    x = (size/1024)/1024
+    return x, id
