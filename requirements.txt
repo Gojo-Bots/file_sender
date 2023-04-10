@@ -1,5 +1,6 @@
 asyncio==3.4.3
 pymongo==4.3.3
+pyRiZoeLX
 pyroaddon==1.0.6
 pyrogram==2.0.100
 tgcrypto==1.2.5
