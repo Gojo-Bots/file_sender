@@ -22,8 +22,14 @@ from Powers.database.voted_users import VINFO
 
 rejoin_try = {} # store the id of the user who lefts the chat while giveaway under-process {c_id:[]}
 
+
+
 @psy.on_message(command(["startgiveaway", "startga"]))
 async def start_give_one(c: psy, m: Message):
+    me = await psy.get_me()
+    BOT_ID = me.id
+    BOT_NAME = me.first_name
+    BOT_USERNAME = me.username
     uWu = True
     try:
         if m.chat.type != CT.PRIVATE:
@@ -65,7 +71,7 @@ async def start_give_one(c: psy, m: Message):
                     GA.update_is_old(m.from_user.id, is_old)
                     GA.stop_entries(m.from_user.id, entries = 1) # To start entries
                     GA.stop_give(m.from_user.id, is_give=1) # To start giveaway
-                    GA.update_ga_id(m.from_user.id, g_id)
+                    GA.update_ga_id(m.from_user.id, give_id)
                     link = await psy.create_chat_invite_link(s_c_id)
                     uWu = False
                     await psy.send_message(m.chat.id,"Done")
@@ -85,7 +91,7 @@ async def start_give_one(c: psy, m: Message):
                     try:
                         c_id = int(channel_id.text)
                         try:
-                            bot_stat = (await psy.get_chat_member(c_id,Config.BOT_ID)).status
+                            bot_stat = (await psy.get_chat_member(c_id,BOT_ID)).status
                             if bot_stat in [CMS.ADMINISTRATOR,CMS.OWNER]:
                                 break
                             else:
@@ -100,7 +106,7 @@ async def start_give_one(c: psy, m: Message):
                 else:
                     if channel_id.forward_from_chat:
                         try:
-                            bot_stat = (await psy.get_chat_member(c_id,Config.BOT_ID)).status
+                            bot_stat = (await psy.get_chat_member(c_id,BOT_ID)).status
                             if bot_stat in [CMS.ADMINISTRATOR,CMS.OWNER]:
                                 break
                             else:
@@ -134,7 +140,7 @@ async def start_give_one(c: psy, m: Message):
                     except ValueError:
                         await psy.send_message(m.chat.id,"Chat id should be integer type")
                     try:
-                        bot_stat = (await psy.get_chat_member(s_c_id,Config.BOT_ID)).status
+                        bot_stat = (await psy.get_chat_member(s_c_id,BOT_ID)).status
                         if bot_stat in [CMS.ADMINISTRATOR,CMS.OWNER]:
                             break
                         else:
@@ -144,18 +150,33 @@ async def start_give_one(c: psy, m: Message):
                 
             await psy.send_message(m.chat.id,"Chat id received")
                 
-            link = await psy.create_chat_invite_link(cc_id)
-
-            yes_no = await psy.ask(text="Do you want to allow old member of the channel can vote in this giveaway.\n**Yes: To allow**\n**No: To don't allow**\nNote that old mean user who is present in the chat for more than 48 hours",chat_id = m.from_user.id,filters=filters.text)
-            if yes_no.text.lower() == "yes":
-                is_old = 0
-            elif yes_no.text.lower() == "no":
-                is_old = 1
-            curr = GA.save_give(g_id,f_c_id, s_c_id, m.from_user.id, is_old, force_c=True)               
+            while True:
+                yes_no = await psy.ask(text="Do you want to allow old member of the channel can vote in this giveaway.\n**Yes: To allow**\n**No: To don't allow**\nNote that old mean user who is present in the chat for more than 48 hours",chat_id = m.from_user.id,filters=filters.text)
+                if yes_no.text.lower() == "yes":
+                    is_old = 0
+                    break
+                elif yes_no.text.lower() == "no":
+                    is_old = 1
+                    break
+                elif str(chat_id.text).lower() == "/cancel":
+                    await psy.send_message(m.from_user.id, "Cancelled")
+                    return
+                else:
+                    await psy.send_message(m.chat.id,"Type yes or no only")
+            xx = GA.give_info(f_c_id)
+            XX = GA.give_info(s_c_id)
+            if xx or XX:
+                await m.reply_text(f"One giveaway database is already registered with\nChannel id:{f_c_id} and group id {s_c_id}")
+                return
+            curr = GA.save_give(give_id,f_c_id, s_c_id, m.from_user.id, is_old, force_c=True)               
     except Exception as e:
-
-        return   
-
+        await m.reply_text(f"Got an error {e}")
+        return
+    cc = (await psy.get_chat(s_c_id)).username
+    link = f"https://t.me/{cc}"
+    if not cc:
+        link = (await psy.create_chat_invite_link(s_c_id)).invite_link
+        
     reply = m.reply_to_message
     giveaway_text = f"""
 **#Giveaway {give_id} 》**
@@ -169,7 +190,7 @@ Bot should be started!!
 **Status : Entries open**
 """
 
-    kb = IKM([[IKB("Join the chat", url=link)],[IKB("Start the bot", url=f"https://{Config.BOT_USERNAME}.t.me/")]])
+    kb = IKM([[IKB("Join the chat", url=link)],[IKB("Start the bot", url=f"https://{BOT_USERNAME}.t.me/")]])
     try:
         if reply and (reply.media in [MMT.VIDEO, MMT.PHOTO] or (reply.document.mime_type.split("/")[0]=="image")):
             if reply.photo:
@@ -183,12 +204,14 @@ Bot should be started!!
         else:
             pin = await psy.send_message(f_c_id,giveaway_text, reply_markup=kb, disable_web_page_preview=True)
     except Exception as e:
-
         await m.reply_text(f"Failed to send message to channel due to\n{e}")
         return
     c_in = await psy.get_chat(f_c_id)
+    lin = f"https://t.me/{c_in.username}"
+    if not c_in.username:
+        lin = c_in.invite_link
     name = c_in.title
-    await m.reply_text(f"✨ Giveaway post has been sent to [{name}]({c_in.invite_link})", disable_web_page_preview=True, reply_markup=IKM([[IKB("Go To Post", url=pin.link)]]))
+    await m.reply_text(f"✨ Giveaway post has been sent to [{name}]({lin})", disable_web_page_preview=True, reply_markup=IKM([[IKB("Go To Post", url=pin.link)]]))
 
 
 async def message_editor(c:psy, m: Message, c_id):
@@ -252,7 +275,7 @@ async def stop_give_entry(c:psy, m: Message):
     z = await message_editor(c,m,c_id)
     if not z:
         return
-    await m.reply_text("Stopped the further entries")
+    await m.reply_text("Stopped further entries")
     return
 
 def clean_values(c_id):
@@ -376,15 +399,17 @@ async def start_the_vote(c: psy, m: Message):
     user = curr["user_id"]
     g_id = curr["giveaway_id"]
     start_vote = curr["voting"]
+    ent = curr["entries"]
     if start_vote:
         await m.reply_text("Voting is already started for this chat")
         return
     GA.voting_start(c_id,True,1)
-    if len(m.text.split(None)) == 2:
-        await message_editor(c,m,c_id)
-    else:
-        await m.reply_text("No message link provided to update status to closed")
-    GA.stop_entries(u_id)
+    if ent:
+        if len(m.text.split(None)) == 2:
+            await message_editor(c,m,c_id)
+        else:
+            await m.reply_text(">>>No message link provided\nUpdate status closed yourself")
+        GA.stop_entries(u_id)
     if u_id != user:
         await m.reply_text("You are not the one who have started the giveaway")
         return
@@ -397,12 +422,12 @@ async def start_the_vote(c: psy, m: Message):
         clean_values(c_id)
         await m.reply_text("No entires found")
         return
-    user = PINFO().get_all_part
+    user = PINFO().get_all_part(c_id)
     users = await psy.get_users(user)
-    if m.chat.username:
-        c_link = f"https://t.me/{m.chat.username}"
-    else:
-        c_link = await psy.create_chat_invite_link(c_id)
+    u_name = (await psy.get_chat(c_id)).username
+    c_link = f"https://t.me/{u_name}"
+    if not u_name:
+        c_link = (await psy.create_chat_invite_link(c_id)).invite_link
     for user in users:
         u_id = user.id
         full_name = user.first_name
@@ -433,6 +458,10 @@ async def start_the_vote(c: psy, m: Message):
 
 @psy.on_message(command(["enter","register","participate"]))
 async def register_user(c: psy, m: Message):
+    me = await psy.get_me()
+    BOT_ID = me.id
+    BOT_NAME = me.first_name
+    BOT_USERNAME = me.username
     GA = GIVEAWAY()
     curr = GA.is_vote(m.chat.id)
     if not curr:
@@ -449,33 +478,30 @@ async def register_user(c: psy, m: Message):
     if PINFO().save_pinfo(m.from_user.id,c_id):
         await m.reply_text("You are already registered")
         return
-
     try:
         await psy.send_message(m.from_user.id, "Thanks for participating in the giveaway")
     except Exception:
-        await m.reply_text("Start the bot first\nAnd try again",reply_markup=IKM([[IKB("Star the bot", url=f"https://{Config.BOT_USERNAME}.t.me/")]]))
+        await m.reply_text("Start the bot first\nAnd try again",reply_markup=IKM([[IKB("Star the bot", url=f"https://{BOT_USERNAME}.t.me/")]]))
         return
-    curr = GA.give_info(m.chat.id)
-    c_id = curr["chat_id"]
     PINFO().save_pinfo(m.from_user.id,c_id)
     await m.reply_text("You are registered successfully\n**Don't block the bot because you are going to get info about giveaway via bot**")
     return
 
 
-@psy.on_callback_query(filters.regex("^vote_"))
+@psy.on_callback_query(filters.regex("^vote_"),18)
 async def vote_increment(c: psy, q: CallbackQuery):
     GA = GIVEAWAY()
     data = q.data.split("_")
     c_id = int(data[1])
     u_id = int(data[2])
-    g_id = data[3]
+    g_id = data[-1]
     curr = GA.give_info(c_id)
     ga_id = curr["giveaway_id"]
     if g_id != ga_id:
-        await q.answer("Can't vote in old giveawa BAKA!!",True)
+        await q.answer("Can't vote in old giveaway BAKA!!",True)
         return
-    if not curr["is_give"]:
-        await q.answer("Voting is closed")
+    if not curr["is_give"] or not curr["voting"]:
+        await q.answer("Voting has been closed for this giveaway",True)
         return
     if not curr:
         return
@@ -501,21 +527,17 @@ async def vote_increment(c: psy, q: CallbackQuery):
     if can_old and can_old < is_part.joined_date:
         await q.answer("Old member can't vote", True)
         return
-    curr = VINFO().save_voter(q.from_user.id,u_id,c_id)
-    if curr:
+    vcurr = VINFO().save_voter(q.from_user.id,u_id,c_id)
+    if vcurr:
         await q.answer("You have already voted once", True)
         return
-    infoo = GA.give_info(c_id)
-    v = infoo["voting"]
-    if v:
-        PINFO().update_votes(c_id,u_id)
-        votes = PINFO().get_cur_votes(u_id,c_id)
-        new_vote = IKM([[IKB(f"❤️ {votes}", f"vote_{c_id}_{u_id}_{ga_id}")]])
-        await q.answer("Voted.")
-        await q.edit_message_reply_markup(new_vote)
-    elif not v:
-        await q.answer("Voting has been closed for this giveaway",True)
-        return
+    PINFO().update_votes(c_id,u_id)
+    votes = PINFO().get_cur_votes(u_id,c_id)
+    new_vote = IKM([[IKB(f"❤️ {votes}", f"vote_{c_id}_{u_id}_{ga_id}")]])
+    await q.answer("Voted.")
+    await q.edit_message_reply_markup(new_vote)
+    return
+    
 
 @psy.on_message(filters.left_chat_member)
 async def rejoin_try_not(c:psy, m: Message):
@@ -525,6 +547,8 @@ async def rejoin_try_not(c:psy, m: Message):
     GA = GIVEAWAY()
     Ezio = GA.give_info(m.chat.id)
     if not Ezio:
+        return
+    elif not Ezio["is_give"]:
         return
     c_id = Ezio["chat_id"]
     Captain = user.id

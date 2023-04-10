@@ -14,7 +14,6 @@ Powers_main_db = Powers_db_client["gojo_give"]
 
 class MongoDB:
     """Class for interacting with Bot database."""
-
     def __init__(self, collection) -> None:
         self.collection = Powers_main_db[collection]
 

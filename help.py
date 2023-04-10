@@ -61,10 +61,11 @@ start_kb = InlineKeyboardMarkup(
             InlineKeyboardButton("Close ❌", callback_data="close")
         ],
         [
-            InlineKeyboardButton("⚡️ Powered By", url = "https://gojo_bots_network.t.me")
+            InlineKeyboardButton("⚡️ Powered By", url = "https://gojo_bots_network.t.me"),
+            InlineKeyboardButton("Group Management bot 🤖", url = "https://t.me/GojoSuperbot")
         ],
         [
-            InlineKeyboardButton("Group Management bot 🤖", url = "https://t.me/GojoSuperbot")
+            InlineKeyboardButton("Repo ✨", url = "https://github.com/Gojo-Bots/file_sender")
         ],
     ]
 )

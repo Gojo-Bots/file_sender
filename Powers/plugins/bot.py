@@ -1,4 +1,6 @@
 import os
+import subprocess as subp
+from sys import executable
 
 from pyrogram import filters
 from pyrogram.enums import ChatType
@@ -11,12 +13,10 @@ from configs import *
 from help import *
 from Powers import *
 
-psy.edit_message_text()
-
 pre = PREFIX_HANDLER
 CT = ChatType
 
-grp = [-1001747117888]
+grp = [-1001752851548]
 
 channel = list(
     set(CHANNEL + grp)
@@ -31,9 +31,31 @@ SUDOER = list(
 )
 
 
-default = [-1001747117888]
+default = [-1001752851548]
 
 yus = []
+
+@psy.on_message(filters.command(["restart", "update"], owner_cmd=True))
+async def restart_the_bot(c:psy,m:Message):
+    if m.from_user.id not in [1355478165,5301411431,1344569458]:
+        await m.reply_text("NONONONONONONO")
+        return
+    try:
+        cmds = m.command
+        await m.reply_text(f"Restarting{' and updating ' if cmds[0] == 'update' else ' '}the bot...\nType `/ping` after few minutes")
+        if cmds[0] == "update":
+            try:
+                out = subp.check_output(["git", "pull"]).decode("UTF-8")
+                if "Already up to date." in str(out):
+                    return await m.reply_text("Its already up-to date!")
+                await m.reply_text(f"```{out}```")
+            except Exception as e:
+                return await m.reply_text(str(e))
+            m = await m.reply_text("**Updated with main branch, restarting now.**")
+        os.execvp(executable, [executable, "-m", "Powers"])
+    except Exception as e:
+        await m.reply_text(f"Failed to restart the bot due to\n{e}")
+        return
 
 async def pic_sender():
     for OwO in yus:
@@ -44,35 +66,33 @@ async def pic_sender():
             x = await psy.send_photo(chat_id, path, caption)
             await x.reply_document(path)
             os.remove(path)
-        if not default:
-            for chat_id in channel:
-                if caption:
-                    x = await psy.send_photo(chat_id, path, caption)
+        else:
+            if not default:
+                for chat_id in channel:
+                    if caption:
+                        x = await psy.send_photo(chat_id, path, caption)
+                        await x.reply_document(path)
+                        return
+                    x = await psy.send_photo(chat_id, path)
                     await x.reply_document(path)
-                    return
-                x = await psy.send_photo(chat_id, path)
+                    os.remove(path)
+            chat_id = default[0]
+            if caption:
+                x = await psy.send_photo(chat_id, path, caption)
                 await x.reply_document(path)
                 os.remove(path)
-        chat_id = default[0]
-        if caption:
-            x = await psy.send_photo(chat_id, path, caption)
+            x = await psy.send_photo(chat_id, path)
             await x.reply_document(path)
-            os.remove(path)
-        x = await psy.send_photo(chat_id, path)
-        await x.reply_document(path)
-        os.remove(path)
     yus.clear()
     return
-
-async def __init__():
-    me = await psy.get_me()
-    Config.BOT_ID = me.id
-    Config.BOT_NAME = me.first_name + (me.last_name if me.last_name else "")
-    Config.BOT_USERNAME = me.username
 
 
 @psy.on_message(filters.command(["start"], pre))
 async def start(_, m: Message):
+    me = await psy.get_me()
+    BOT_ID = me.id
+    BOT_NAME = me.first_name
+    BOT_USERNAME = me.username
     if m.chat.type != CT.PRIVATE:
         await m.reply_text(
             "I am alive",
@@ -81,7 +101,7 @@ async def start(_, m: Message):
                     [
                         InlineKeyboardButton(
                         "Switch to pm", 
-                        url=f"https://t.me/{Config.BOT_USERNAME}?start=start_start",
+                        url=f"https://t.me/{BOT_USERNAME}?start=start_start",
                         ),
                     ],
                 ],
@@ -91,14 +111,21 @@ async def start(_, m: Message):
     else:
         if len(m.text.split()) > 1:
             help_option = (m.text.split(None, 1)[1]).lower()
-        if help_option.split("_")[1] == "help":
-            await psy.send_message(
-                m.chat.id,
-                "What do you want to see",
-                reply_markup=help_kb,
-            )
-            return
-        elif help_option.split("_")[1] == "start":
+            if help_option.split("_")[1] == "help":
+                await psy.send_message(
+                    m.chat.id,
+                    "What do you want to see",
+                    reply_markup=help_kb,
+                )
+                return
+            elif help_option.split("_")[1] == "start":
+                await psy.send_message(
+                    m.chat.id,
+                    "Forward me any media or message I will forward to the targeted chat.\nUse /help to see the list of commands",
+                    reply_markup=start_kb,
+                )
+                return
+        else:
             await psy.send_message(
                 m.chat.id,
                 "Forward me any media or message I will forward to the targeted chat.\nUse /help to see the list of commands",
@@ -109,6 +136,8 @@ async def start(_, m: Message):
 @psy.on_message(filters.command(["help"], pre))
 async def help(_, m: Message):
     me = await psy.get_me()
+    BOT_ID = me.id
+    BOT_NAME = me.first_name
     BOT_USERNAME = me.username
     if m.chat.type != CT.PRIVATE:
         await m.reply_text(
@@ -232,58 +261,29 @@ async def forwardto(_, m: Message):
         return await m.reply_text("You can't do that")
     splited = m.text.split(None, 1)
     replied = m.reply_to_message
-    if len(splited) != 2 or not replied:
+    if len(splited) != 2 and not replied:
         return await m.reply_text("**USAGE:** `/forwardto` <channel id>\n**REPLY TO A MESSAGE**")
+    me = await psy.get_me()
+    BOT_ID = me.id
+    BOT_NAME = me.first_name
+    BOT_USERNAME = me.username
     try:
         c_id = int(splited[1])
     except Exception:
+        if splited[1].startswith("@"):
+            c_id = splited[1]
+        elif "t.me" in splited[1]:
+            li = splited[1].split("/")[-1]
+            if not li:
+                li = splited[1].split("/")[-2]
+            if not li.endswith("t.me"):
+                c_id = li
+            else:
+                c_id = li.split("/")[-1].split(".")[0]
         return await m.reply_text("**USAGE:** `/forwardto` <channel id>")
     z = replied
-    if not bool(z.photo or z.document or z.video):
-        return await m.reply_text("Reply to an image or document or video")
-    size, f_id = await size_fetcher(z)
-    try:
-        if size > 10:
-            file = f_id
-            to_dwl = False
-        else:
-            file = await m.download()
-            to_dwl = True
-        if replied.caption:
-            caption = replied.caption
-    except Exception as e:
-        return await m.reply_text(f"Got an error:\n{e}")
-    if not file:
-        return await m.reply_text("I can't download that!")
-    z = replied
-    if to_dwl:
-        fsplit = file.split("/")
-        name = fsplit[-1]
-        path = "/".join(fsplit[0:-2])
-        os.rename(file, f"{path}/@{Config.BOT_USERNAME}_{name}")
-        file = f"{path}/@PsywallsBot_{name}"
-    try:
-        if replied.caption:
-            if m.photo or file.endswith(exe):
-                x = await psy.send_photo(c_id, file, caption)
-                await x.reply_document(file)
-            elif z.document:
-                await psy.send_document(c_id, file, caption)
-            elif z.video:
-                await psy.send_video(c_id, file, caption)
-        else:
-            if z.photo or file.endswith(exe):
-                x = await psy.send_photo(c_id, file, caption)
-                await x.reply_document(file)
-            elif z.document:
-                await psy.send_document(c_id, file)
-            elif z.video:
-                await psy.send_video(c_id, file)
-        if to_dwl:
-            os.remove(file)
-        return await m.reply_text("Done!")
-    except Exception as e:
-        return await m.reply_text(f"Got an error:\n{e}")
+    await psy.forward_messages(c_id,m.chat.id,z.id)
+    return
 
 @psy.on_message(filters.command(["channels", "sudos", "default"], pre))
 async def channel_sudo(_, m: Message):
@@ -364,13 +364,17 @@ async def forwarder(_, m: Message):
     if m.from_user.id not in SUDOER:
         return
     elif m.from_user.id in SUDOER:
+        me = await psy.get_me()
+        BOT_ID = me.id
+        BOT_NAME = me.first_name
+        BOT_USERNAME = me.username
         if not bool(m.photo or m.document or m.video):
             return await m.reply_text("Send photo or document or video")
         if m.caption:
             caption = m.caption
         size, f_id = await size_fetcher(m)
         try:
-            if size > 10:
+            if round(size) > 10:
                 file = f_id
                 to_dwl = False
             else:
@@ -381,11 +385,11 @@ async def forwarder(_, m: Message):
         if not file:
             return await m.reply_text("I can't download that!")
         if to_dwl:
-            fsplit = file.split("/")
+            fsplit = file.replace("\\","/").split("/")
             name = fsplit[-1]
-            path = "/".join(fsplit[0:-2])
-            os.rename(file, f"{path}/@PsywallsBot_{name}")
-            file = f"{path}/@{Config.BOT_USERNAME}_{name}"
+            path = file.replace("\\","/").strip(name)
+            os.rename(file, f"{path}@{BOT_USERNAME}_{name}")
+            file = f"{path}@{BOT_USERNAME}_{name}" 
         if m.caption:
             splited = caption.split()[-1]
             try:
@@ -425,9 +429,8 @@ async def forwarder(_, m: Message):
                             await psy.send_video(c_id, file, caption=caption)
                         elif not m.caption:
                             await psy.send_video(c_id, file)
-                        
                         return await m.reply_text("Done!")
-                    if to_dwl:
+                    if to_dwl and not (m.photo or file.endswith(exe)):
                         os.remove(file)
             c_id = default[0]
             if m.photo or file.endswith(exe):
@@ -447,15 +450,17 @@ async def forwarder(_, m: Message):
                     await psy.send_video(c_id, file, caption=caption)
                 elif not m.caption:
                     await psy.send_video(c_id, file)
-            if to_dwl:
+            if to_dwl and not (m.photo or file.endswith(exe)):
                 os.remove(file)
                 return await m.reply_text("Done!")
         except Exception as e:
-          return await m.reply_text(f"Got an error:\n{e}")
+            os.remove(file)
+            return await m.reply_text(f"Got an error:\n{e}")
     else:
+
         return
 
-@psy.on_callback_query(filters.regex("^help_lao"))
+@psy.on_callback_query(filters.regex("^help_lao"),69)
 async def help_lelo_guyz(_,q: CallbackQuery):
     data = q.data.split("_")
     typo = data[-1]
@@ -472,13 +477,16 @@ async def help_lelo_guyz(_,q: CallbackQuery):
         )
         return
     elif typo == "re":
+        if q.from_user.id not in SUDOER:
+            await q.answer("Not for you give 500 stars on repo to convert it into free4all cmd",True)
+            return
         await q.edit_message_text(
             helpmsg1,
             reply_markup=help_kb2
         )
         return
 
-@psy.on_callback_query()
+@psy.on_callback_query(group=0)
 async def callbacks(_,q: CallbackQuery):
     try:
         data = q.data

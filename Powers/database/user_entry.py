@@ -81,7 +81,7 @@ class PINFO(MongoDB):
                 max_val = max([i["votes"] for i in curr])
                 users = []
                 for i in curr:
-                    if i["votes"] == max:
+                    if i["votes"] == max_val:
                         users.append(i)
                 return max_val, users
                 
