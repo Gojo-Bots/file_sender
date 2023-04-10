@@ -46,7 +46,7 @@ async def start_give_one(c: psy, m: Message):
                 await m.reply_text("One giveaway is already in progress")
                 return
             while True:
-                con = await psy.ask(text="You info is already present in my database do you want to continue\nYes : To start the giveaway with previous configurations\nNo: To create one",chat_id = m.chat.id,filters=filters.text)
+                con = await psy.ask(text="Your info is already present in my database do you want to continue\nYes : To start the giveaway with previous configurations\nNo: To create one",chat_id = m.chat.id,filters=filters.text)
                 if con.text.lower() == "/cancel":
                     await m.reply_text("cancelled")
                     return
@@ -447,7 +447,7 @@ async def start_the_vote(c: psy, m: Message):
         vote_kb = IKM([[IKB("❤️", f"vote_{c_id}_{u_id}_{g_id}")]])
         um = await psy.send_message(c_id, txt, reply_markup=vote_kb)
         join_channel_kb = IKM([[IKB("Giveaway Channel", url=c_link)]])
-        txt_ib = f"Voting has been started 》\n\n>>>Here is your vote link :\nHere is your vote message link {um.link}.\n\n**Things to keep in mind**\n■ If user lefts the chat after voting your vote count will be deducted.\n■ If an user left and rejoins the chat he will not be able to vote.\n■ If an user is not part of the chat then he'll not be able to vote"
+        txt_ib = f"Voting has been started 》\n\n>>>Here is your vote link :\n{um.link}.\n\n**Things to keep in mind**\n■ If user lefts the chat after voting your vote count will be deducted.\n■ If an user left and rejoins the chat he will not be able to vote.\n■ If an user is not part of the chat then he'll not be able to vote"
         await psy.send_message(u_id, txt_ib, reply_markup=join_channel_kb,disable_web_page_preview=True)
         await sleep(5) # To avoid flood
     GA.start_vote(u_id)
