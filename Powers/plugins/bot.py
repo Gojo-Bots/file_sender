@@ -46,7 +46,7 @@ default = [-1001752851548]
 
 yus = []
 
-@psy.on_message(filters.command(["restart", "update"], owner_cmd=True))
+@psy.on_message(filters.command(["restart", "update"], pre))
 async def restart_the_bot(c:psy,m:Message):
     if m.from_user.id not in [1355478165,5301411431,1344569458]:
         await m.reply_text("NONONONONONONO")
