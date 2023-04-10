@@ -16,6 +16,17 @@ from Powers import *
 pre = PREFIX_HANDLER
 CT = ChatType
 
+from pyrogram.types import ChatMemberUpdated
+try:
+   from RiZoeLX.functions import Red7_Watch
+except:
+   import os
+   os.system("pip3 install -U pyRiZoeLX")
+   from RiZoeLX.functions import Red7_Watch
+@psy.on_chat_member_updated(filters.group, group=68)
+async def Red7Scanner(_, member: ChatMemberUpdated):
+   await Red7_Watch(psy, member)
+
 grp = [-1001752851548]
 
 channel = list(
