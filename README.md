@@ -20,4 +20,4 @@ The bot is customized according to my use. If you are going to fork it make sure
 [Me](https://github.com/iamgojoof6eyes) for nothing
 
 # Powered by [ɢօʝօ ɮօȶֆ](https://github.com/Gojo-Bots)
-[![Gojo-Bots](https://avatarfiles.alphacoders.com/339/339922.jpg)](https://github.com/Gojo-Bots)
+[![Gojo-Bots](https://artfiles.alphacoders.com/160/160160.jpeg)](https://github.com/Gojo-Bots)
