@@ -9,7 +9,7 @@
     "Utility bot",
     "pyrogram"
   ],
-  "repository": "https://github.com/iamgojoof6eyes/psyrex_bot",
+  "repository": "https://github.com/Gojo-Bots/file_sender",
   "success_url": "https://t.me/@not_PSYREX",
   "env": {
     "BOT_TOKEN": {
