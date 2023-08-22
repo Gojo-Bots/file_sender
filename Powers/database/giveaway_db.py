@@ -39,7 +39,8 @@ class GIVEAWAY(MongoDB):
                             "is_new":is_new,
                             "entries":entries,
                             "is_give":give,
-                            "voting":voting
+                            "voting":voting,
+                            "custom_text": 0
                         }
                     )
                     return True
@@ -128,4 +129,26 @@ class GIVEAWAY(MongoDB):
             if curr:
                 self.update({"user_id":user_id},{"is_give":is_give})
                 return True
-            return True
+            return 
+            
+    def set_custom_text(self, user_id, chat_id, give_text):
+        with INSERTION_LOCK:
+            curr = self.find_one({"user_id":user_id,"chat_id":chat_id})
+            if curr:
+                self.update({"user_id":user_id,"chat_id":chat_id}, {"custom_text":give_text})
+                return True
+            return
+    def get_custom_text(self, user_id, chat_id=0):
+        with INSERTION_LOCK:
+            if chat_id:
+                curr = self.find_one({"user_id":user_id,"chat_id":chat_id})
+                if curr:
+                    OwO = curr["custom_text"]
+            elif not chat_id:
+                curr = self.find_all({"user_id":user_id})
+                if curr:
+                    OwO = [i["chat_id"] for i in curr]
+            else:
+                OwO = None
+            return OwO
+            

@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 from random import choice
 
 from pyrogram import filters
-from pyrogram.enums import ChatMemberStatus as CMS
+from pyrogram.enums import ChatMemberStatus as CMS, ParseMode as PM
 from pyrogram.enums import ChatType as CT
 from pyrogram.enums import MessageMediaType as MMT
 from pyrogram.errors import UserNotParticipant
@@ -22,7 +22,16 @@ from Powers.database.voted_users import VINFO
 
 rejoin_try = {} # store the id of the user who lefts the chat while giveaway under-process {c_id:[]}
 
+give_text = f"""
+➖➖➖➖➖➖➖➖➖➖➖
+__To win this logo giveaway__
+__participate in the contest__,
+__Comment /enter to begin__
 
+Bot should be started!!
+➖➖➖➖➖➖➖➖➖➖➖
+**Status : Entries open**
+"""
 
 @psy.on_message(command(["startgiveaway", "startga"]))
 async def start_give_one(c: psy, m: Message):
@@ -163,6 +172,38 @@ async def start_give_one(c: psy, m: Message):
                     return
                 else:
                     await psy.send_message(m.chat.id,"Type yes or no only")
+            while True:
+                custom = await psy.ask(text="Send me a custom text to send as an announcement text for giveaway message.\nType /skip to skip this\nType /mytext to get the pre built text.",chat_id = m.from_user.id,filters=filters.text)
+                if str(custom.text).lower() == "/skip":
+                    is_cust = False
+                    break
+                elif str(custom.text).lower() == "/mytext":
+                    txt = GA.get_custom_text(m.from_user.id, f_c_id)
+                    if txt:
+                        await psy.send_message(txt)
+                    else:
+                        await psy.send_message(give_text)
+                else:
+                    giveaway_text = custom.text.markdown
+                    if len(giveaway_text) > 1024:
+                        await psy.send_message("Message is too long.Character limit is 1024 characters")
+                    else:
+                        while True: 
+                            uu = await psy.ask("Are you sure to set your announcement text the one your provided above\n Yes or No",chat_id = m.chat.id,filters=filters.text)
+                            if uu.text.lower() == "yes":
+                                await psy.send_message("Okay your announcement text has been saved")
+                                RJ = True
+                                break
+                            elif uu.text.lower() == "no":
+                                RJ = False
+                                await psy.send_message("Ok send me new one")
+                                break
+                            else:
+                                await psy.send_message(m.chat.id,"Type yes or no only")
+                        if RJ:
+                            is_cust = giveaway_text
+                            break
+            GA.set_custom_text(m.from_user.id, f_c_id,is_cust)
             xx = GA.give_info(f_c_id)
             XX = GA.give_info(s_c_id)
             if xx or XX:
@@ -178,31 +219,21 @@ async def start_give_one(c: psy, m: Message):
         link = (await psy.create_chat_invite_link(s_c_id)).invite_link
         
     reply = m.reply_to_message
-    giveaway_text = f"""
-**#Giveaway {give_id} 》**
-➖➖➖➖➖➖➖➖➖➖➖
-__To win this logo giveaway__
-__participate in the contest__,
-__Comment /enter to begin__
-
-Bot should be started!!
-➖➖➖➖➖➖➖➖➖➖➖
-**Status : Entries open**
-"""
-
+    GIVE = is_cust if is_cust else give_text
+    giveaway_text = f"**#Giveaway {give_id}》**\n" + GIVE
     kb = IKM([[IKB("Join the chat", url=link)],[IKB("Start the bot", url=f"https://{BOT_USERNAME}.t.me/")]])
     try:
         if reply and (reply.media in [MMT.VIDEO, MMT.PHOTO] or (reply.document.mime_type.split("/")[0]=="image")):
             if reply.photo:
-                pin = await psy.send_photo(f_c_id, reply.photo.file_id, giveaway_text, reply_markup=kb)
+                pin = await psy.send_photo(f_c_id, reply.photo.file_id, giveaway_text, reply_markup=kb, parse_mode=PM.MARKDOWN)
             elif reply.video:
-                pin = await psy.send_video(f_c_id, reply.video.file_id, giveaway_text, reply_markup=kb)
+                pin = await psy.send_video(f_c_id, reply.video.file_id, giveaway_text, reply_markup=kb,parse_mode=PM.MARKDOWN)
             elif reply.document:
                 download = await reply.download()
-                pin = await psy.send_photo(f_c_id, download, giveaway_text, reply_markup=kb)
+                pin = await psy.send_photo(f_c_id, download, giveaway_text, reply_markup=kb,parse_mode=PM.MARKDOWN)
                 os.remove(download)
         else:
-            pin = await psy.send_message(f_c_id,giveaway_text, reply_markup=kb, disable_web_page_preview=True)
+            pin = await psy.send_message(f_c_id,giveaway_text, reply_markup=kb, disable_web_page_preview=True,parse_mode=PM.MARKDOWN)
     except Exception as e:
         await m.reply_text(f"Failed to send message to channel due to\n{e}")
         return
@@ -215,10 +246,15 @@ Bot should be started!!
 
 
 async def message_editor(c:psy, m: Message, c_id):
-    curr = GIVEAWAY().give_info(c_id)
+    GA = GIVEAWAY()
+    curr = GA.give_info(c_id)
     if curr:
         g_id = curr["giveaway_id"]
-    txt = f"""
+    cust = GA.get_custom_text(m.from_user.id, c_id)
+    if cust:
+        txt = f"**#Giveaway {g_id}》**\n" + cust + "\n" + f"**Status : Entries closed\n**Total entries : {PINFO().total_participants(c_id)}**"
+    else: 
+        txt = f"""
 **#Giveaway {g_id}》**
 ➖➖➖➖➖➖➖➖➖➖➖
 __To win this logo giveaway__
@@ -568,3 +604,49 @@ async def rejoin_try_not(c:psy, m: Message):
             rejoin_try[m.chat.id] = [Captain]
         return
 
+async def arranged_list(argument:list):
+    argument = argument.sort()
+    new = [argument[i:i+3] for i in range(0,len(argument),3)]
+    return new
+@psy.on_message(filters.command(["mytext"]))
+async def is_cust_text(c:psy, m: Message):
+    try:
+        txt = GIVEAWAY().get_custom_text(m.from_user.id,int(m.command[1]))
+        if txt:
+            await m.reply_text(f"Your announcement text is:\n{txt}")
+            return
+    except Exception as e:
+        pass
+    cust = GIVEAWAY().get_custom_text(m.from_user.id)
+    if not cust:
+        await m.reply_text("You are not in my database")
+        return
+    arg = []
+    try:
+        for i in cust:
+            x = await psy.get_chat(i)
+            arg.append(IKB(x.title,f"cust_{m.from_user.id}_{i}"))
+    except Exception as e:
+        await m.reply_text(e)
+        return
+    new = await arranged_list(arg)
+    await m.reply_text("You want to fetch custom text of which channel",reply_markup=IKM(new))
+    return
+
+@psy.on_callback_query(filters.regex("^cust_"),11)
+async def texxxt(c:psy, q: CallbackQuery):
+    data = q.data.split("_")
+    user = int(data[1])
+    chat = int(data[2])
+    if q.from_user.id != user:
+        await q.answer("Not for you")
+        return
+    else:
+        title = (await psy.get_chat(chat)).title
+        curr = GIVEAWAY().get_custom_text(user,chat)
+        if not curr:
+            txt = give_text
+        else:
+            txt = curr
+        await q.edit_message_text(f"Here is the announcement text for {title}\n{txt}")
+        return

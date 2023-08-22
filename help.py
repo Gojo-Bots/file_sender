@@ -31,6 +31,7 @@ helpmsg2="""**Here are the list of available commands:**
 • /stopentry <post link>: Stop the further entries. Channel for which you want to stop the entries. Pass the post link of the post you want to edit the msg and set it as closed message
 • /stopgiveaway (/stopga) : Stop the giveaway. Channel for which you want to stop the giveaway. Will also close voting at same time.
 • /startvote <post link>: Start uploading all the user info and will start voting. Pass the post link of the post you want to edit the msg and set it as closed message. Not necessary to give post link.
+• /startvote : To get the announcement text. You can edit it while starting a giveaway
 
 **Post link (For Channels) = Message link (For chats)**
 
